@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="gu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Contact Us - Online Education Guru | સંપર્ક કરો">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#6c63ff">
+    <title>Contact Us - Online Education Guru</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/common.css">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <header class="site-header" id="site-header"></header>
+    <div class="news-ticker" id="news-ticker"></div>
+
+    <main class="page-wrapper">
+        <div class="container">
+
+            <div class="page-header">
+                <button class="back-btn" onclick="history.back()">←</button>
+                <h1 class="page-title">📞 સંપર્ક કરો</h1>
+            </div>
+
+            <div class="ad-container" data-ad-slot="1414141401" data-ad-format="auto"></div>
+
+            <!-- Contact Cards -->
+            <div
+                style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:var(--space-md);margin-bottom:var(--space-xl);">
+                <div
+                    style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:var(--space-xl);text-align:center;animation:fadeInUp 0.3s ease;">
+                    <div style="font-size:2.5rem;margin-bottom:var(--space-sm);">📧</div>
+                    <h3 style="font-size:var(--font-size-md);font-weight:700;margin-bottom:var(--space-xs);">Email</h3>
+                    <p style="color:var(--text-secondary);font-size:var(--font-size-sm);" id="contactEmail">
+                        info@onlineeducationguru.com</p>
+                </div>
+                <div
+                    style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:var(--space-xl);text-align:center;animation:fadeInUp 0.4s ease;">
+                    <div style="font-size:2.5rem;margin-bottom:var(--space-sm);">📱</div>
+                    <h3 style="font-size:var(--font-size-md);font-weight:700;margin-bottom:var(--space-xs);">Phone</h3>
+                    <p style="color:var(--text-secondary);font-size:var(--font-size-sm);" id="contactPhone">+91
+                        XXXXXXXXXX</p>
+                </div>
+                <div
+                    style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:var(--space-xl);text-align:center;animation:fadeInUp 0.5s ease;">
+                    <div style="font-size:2.5rem;margin-bottom:var(--space-sm);">📍</div>
+                    <h3 style="font-size:var(--font-size-md);font-weight:700;margin-bottom:var(--space-xs);">Address
+                    </h3>
+                    <p style="color:var(--text-secondary);font-size:var(--font-size-sm);" id="contactAddress">Gujarat,
+                        India</p>
+                </div>
+            </div>
+
+            <!-- Contact Form -->
+            <section class="section" style="animation:fadeInUp 0.6s ease;">
+                <h2 style="font-size:var(--font-size-lg);font-weight:700;margin-bottom:var(--space-md);">✉️ મેસેજ મોકલો
+                </h2>
+                <div
+                    style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-xl);padding:var(--space-xl);">
+                    <div class="form-group">
+                        <label class="form-label">નામ *</label>
+                        <input type="text" class="form-input" id="cName" placeholder="તમારું નામ">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email *</label>
+                        <input type="email" class="form-input" id="cEmail" placeholder="email@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">વિષય</label>
+                        <input type="text" class="form-input" id="cSubject" placeholder="Message subject">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">મેસેજ *</label>
+                        <textarea class="form-input" id="cMessage" rows="5" placeholder="તમારો મેસેજ લખો..."></textarea>
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="sendContactMessage()">📨 મોકલો</button>
+                </div>
+            </section>
+
+            <div class="ad-container ad-container-rect" data-ad-slot="1414141402" data-ad-format="auto"></div>
+
+        </div>
+    </main>
+
+    <footer class="site-footer" id="site-footer"></footer>
+    <script src="js/common.js"></script>
+    <script>
+        // Load settings for contact info
+        document.addEventListener('DOMContentLoaded', async function () {
+            try {
+                const res = await apiCached('getSettings');
+                if (res.success && res.data) {
+                    if (res.data.contactEmail) document.getElementById('contactEmail').textContent = res.data.contactEmail;
+                    if (res.data.contactPhone) document.getElementById('contactPhone').textContent = res.data.contactPhone;
+                    if (res.data.address) document.getElementById('contactAddress').textContent = res.data.address;
+                }
+            } catch (err) { }
+        });
+
+        async function sendContactMessage() {
+            const name = document.getElementById('cName').value.trim();
+            const email = document.getElementById('cEmail').value.trim();
+            const subject = document.getElementById('cSubject').value.trim();
+            const message = document.getElementById('cMessage').value.trim();
+
+            if (!name) { showToast('નામ ભરો', 'error'); return; }
+            if (!email || !email.includes('@')) { showToast('સાચો Email ભરો', 'error'); return; }
+            if (!message) { showToast('મેસેજ લખો', 'error'); return; }
+
+            showLoader('Sending...');
+            try {
+                // Use mailto as fallback since Google Apps Script handles email
+                const mailtoUrl = `mailto:${document.getElementById('contactEmail').textContent}?subject=${encodeURIComponent(subject || 'Contact from ' + name)}&body=${encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\n\n' + message)}`;
+                window.location.href = mailtoUrl;
+                showToast('Email app ખુલ્યું!', 'success');
+            } catch (err) {
+                showToast('Error', 'error');
+            }
+            hideLoader();
+        }
+    </script>
+</body>
+
+</html>

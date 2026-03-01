@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="gu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Quiz Certificate | Online Education Guru">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#6c63ff">
+    <title>સર્ટિફિકેટ - Online Education Guru</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/common.css">
+    <!-- html2canvas for certificate capture -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        .cert-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+            background: var(--bg-gradient);
+        }
+
+        .certificate {
+            width: 100%;
+            max-width: 550px;
+            background: linear-gradient(135deg, #0a0a2e 0%, #1a1050 30%, #0d0d35 70%, #0a0a2e 100%);
+            border: none;
+            border-radius: 0;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Ornate border */
+        .certificate::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border: 2px solid rgba(255, 214, 0, 0.4);
+        }
+
+        .certificate::after {
+            content: '';
+            position: absolute;
+            inset: 12px;
+            border: 1px solid rgba(255, 214, 0, 0.15);
+        }
+
+        /* Corner decorations */
+        .cert-corner {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 214, 0, 0.6);
+        }
+
+        .cert-corner.tl {
+            top: 16px;
+            left: 16px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .cert-corner.tr {
+            top: 16px;
+            right: 16px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .cert-corner.bl {
+            bottom: 16px;
+            left: 16px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .cert-corner.br {
+            bottom: 16px;
+            right: 16px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .cert-logo {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .cert-org {
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255, 214, 0, 0.7);
+            margin-bottom: 8px;
+        }
+
+        .cert-main-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffd600, #ff9100, #ffd600);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+
+        .cert-subtitle {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 20px;
+        }
+
+        .cert-divider {
+            width: 60%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 214, 0, 0.4), transparent);
+            margin: 16px auto;
+        }
+
+        .cert-label {
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 8px;
+        }
+
+        .cert-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 6px;
+            text-shadow: 0 2px 10px rgba(108, 99, 255, 0.3);
+        }
+
+        .cert-category {
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            margin-bottom: 16px;
+        }
+
+        .cert-score-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            background: rgba(0, 200, 150, 0.1);
+            border: 1px solid rgba(0, 200, 150, 0.3);
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+        }
+
+        .cert-score-num {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent-green);
+        }
+
+        .cert-score-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: left;
+        }
+
+        .cert-percentage {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent-cyan);
+        }
+
+        .cert-sign-area {
+            margin-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-sign-name {
+            font-size: 0.9rem;
+            font-style: italic;
+            color: rgba(255, 214, 0, 0.8);
+            margin-bottom: 4px;
+        }
+
+        .cert-sign-line {
+            width: 140px;
+            height: 1px;
+            background: rgba(255, 214, 0, 0.3);
+            margin: 0 auto 6px;
+        }
+
+        .cert-sign-title {
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.35);
+            letter-spacing: 2px;
+        }
+
+        .cert-date {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 12px;
+        }
+
+        /* Star decorations */
+        .cert-star {
+            position: absolute;
+            color: rgba(255, 214, 0, 0.15);
+            font-size: 1.5rem;
+            z-index: 0;
+        }
+
+        .cert-star.s1 {
+            top: 30px;
+            right: 50px;
+        }
+
+        .cert-star.s2 {
+            bottom: 40px;
+            left: 40px;
+        }
+
+        .cert-star.s3 {
+            top: 50%;
+            left: 20px;
+        }
+
+        /* Actions */
+        .cert-actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            max-width: 550px;
+            width: 100%;
+            margin-top: var(--space-xl);
+        }
+
+        .cert-actions .btn {
+            justify-content: center;
+        }
+
+        .share-row {
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        .share-row .btn {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="cert-page">
+
+        <!-- Certificate -->
+        <div class="certificate" id="certificateEl">
+            <!-- Corner decorations -->
+            <div class="cert-corner tl"></div>
+            <div class="cert-corner tr"></div>
+            <div class="cert-corner bl"></div>
+            <div class="cert-corner br"></div>
+
+            <!-- Star decorations -->
+            <span class="cert-star s1">✦</span>
+            <span class="cert-star s2">✦</span>
+            <span class="cert-star s3">✦</span>
+
+            <div class="cert-logo">📚</div>
+            <div class="cert-org">ONLINE EDUCATION GURU</div>
+            <div class="cert-main-title">પ્રમાણપત્ર</div>
+            <div class="cert-subtitle">Certificate of Achievement</div>
+
+            <div class="cert-divider"></div>
+
+            <div class="cert-label">THIS IS PRESENTED TO</div>
+            <div class="cert-name" id="certName">-</div>
+
+            <div class="cert-category" id="certCategory">-</div>
+
+            <div class="cert-score-box">
+                <div>
+                    <div class="cert-score-num" id="certScore">0/0</div>
+                    <div class="cert-score-label">Score</div>
+                </div>
+                <div style="width:1px;height:40px;background:rgba(255,255,255,0.1);"></div>
+                <div>
+                    <div class="cert-percentage" id="certPercentage">0%</div>
+                    <div class="cert-score-label">Percentage</div>
+                </div>
+            </div>
+
+            <div class="cert-divider"></div>
+
+            <div class="cert-sign-area">
+                <div class="cert-sign-line"></div>
+                <div class="cert-sign-name">Online Education Guru</div>
+                <div class="cert-sign-title">AUTHORIZED SIGNATURE</div>
+            </div>
+
+            <div class="cert-date" id="certDate"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="cert-actions">
+            <button class="btn btn-primary btn-full" onclick="downloadPNG()">📥 PNG ડાઉનલોડ કરો</button>
+            <button class="btn btn-secondary btn-full" onclick="downloadPDF()">📄 PDF ડાઉનલોડ કરો</button>
+            <div class="share-row">
+                <button class="btn btn-success" onclick="shareWhatsApp()">💬 WhatsApp શેર</button>
+                <button class="btn btn-secondary" onclick="window.location.href='quiz.html'">🔄 બીજી ક્વિઝ</button>
+            </div>
+            <button class="btn btn-secondary btn-full" onclick="window.location.href='index.html'">🏠 હોમ</button>
+        </div>
+
+        <div class="ad-container ad-container-rect mt-lg" data-ad-slot="1010101001" data-ad-format="auto"
+            style="max-width:550px;width:100%;"></div>
+
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        // Get certificate data from URL params
+        const params = new URLSearchParams(window.location.search);
+        const name = params.get('name') || 'Student';
+        const score = params.get('score') || '0';
+        const total = params.get('total') || '0';
+        const percentage = params.get('percentage') || '0';
+        const category = params.get('category') || 'Quiz';
+        const dateStr = params.get('date') || new Date().toLocaleDateString('gu-IN');
+
+        // Fill certificate
+        document.getElementById('certName').textContent = name;
+        document.getElementById('certCategory').textContent = category;
+        document.getElementById('certScore').textContent = score + '/' + total;
+        document.getElementById('certPercentage').textContent = percentage + '%';
+        document.getElementById('certDate').textContent = 'Date: ' + dateStr;
+        document.title = name + ' - Certificate | Online Education Guru';
+
+        // ---- Download as PNG ----
+        async function downloadPNG() {
+            showLoader('Certificate તૈયાર થઈ રહ્યું છે...');
+            try {
+                const el = document.getElementById('certificateEl');
+                const canvas = await html2canvas(el, {
+                    scale: 2,
+                    backgroundColor: '#0a0a2e',
+                    useCORS: true,
+                    logging: false
+                });
+
+                const link = document.createElement('a');
+                link.download = `Certificate_${name.replace(/\s+/g, '_')}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showToast('PNG ડાઉનલોડ થયું!', 'success');
+            } catch (err) {
+                console.error('PNG Error:', err);
+                showToast('ડાઉનલોડ સમસ્યા', 'error');
+            }
+            hideLoader();
+        }
+
+        // ---- Download as PDF ----
+        async function downloadPDF() {
+            showLoader('PDF તૈયાર થઈ રહ્યું છે...');
+            try {
+                const el = document.getElementById('certificateEl');
+                const canvas = await html2canvas(el, {
+                    scale: 2,
+                    backgroundColor: '#0a0a2e',
+                    useCORS: true,
+                    logging: false
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'px',
+                    format: [canvas.width, canvas.height]
+                });
+
+                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+                pdf.save(`Certificate_${name.replace(/\s+/g, '_')}.pdf`);
+                showToast('PDF ડાઉનલોડ થયું!', 'success');
+            } catch (err) {
+                console.error('PDF Error:', err);
+                showToast('PDF ડાઉનલોડ સમસ્યા', 'error');
+            }
+            hideLoader();
+        }
+
+        // ---- Share on WhatsApp as PNG ----
+        async function shareWhatsApp() {
+            try {
+                const el = document.getElementById('certificateEl');
+                const canvas = await html2canvas(el, {
+                    scale: 2,
+                    backgroundColor: '#0a0a2e',
+                    useCORS: true,
+                    logging: false
+                });
+
+                // Try Web Share API first (mobile)
+                if (navigator.share && navigator.canShare) {
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], `Certificate_${name}.png`, { type: 'image/png' });
+                        try {
+                            await navigator.share({
+                                title: 'Online Education Guru - Certificate',
+                                text: `🏆 ${name} એ ${category} ક્વિઝમાં ${percentage}% સ્કોર મેળવ્યો!\n\n📚 Online Education Guru`,
+                                files: [file]
+                            });
+                        } catch (shareErr) {
+                            // Fallback to WhatsApp URL
+                            fallbackWhatsApp();
+                        }
+                    }, 'image/png');
+                } else {
+                    fallbackWhatsApp();
+                }
+            } catch (err) {
+                fallbackWhatsApp();
+            }
+        }
+
+        function fallbackWhatsApp() {
+            const text = encodeURIComponent(
+                `🏆 *${name}* એ *${category}* ક્વિઝમાં *${percentage}%* સ્કોર મેળવ્યો!\n` +
+                `📊 Score: ${score}/${total}\n\n` +
+                `📚 Online Education Guru\n` +
+                `🔗 ${window.location.origin}/quiz.html`
+            );
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        // Init ads
+        setTimeout(initAdSlots, 1000);
+    </script>
+</body>
+
+</html>

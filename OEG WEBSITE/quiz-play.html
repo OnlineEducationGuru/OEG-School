@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="gu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Online Quiz Play | Online Education Guru">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#6c63ff">
+    <title>ક્વિઝ | Online Education Guru</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .quiz-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .quiz-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-counter {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .quiz-score-badge {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            padding: 4px 12px;
+            border-radius: 100px;
+            background: rgba(0, 200, 150, 0.15);
+            color: var(--accent-green);
+            font-weight: 700;
+            font-size: var(--font-size-sm);
+        }
+
+        .question-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .question-number {
+            font-size: var(--font-size-xs);
+            color: var(--primary-light);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+        }
+
+        .question-text {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            line-height: 1.8;
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            width: 100%;
+            padding: var(--space-md) var(--space-lg);
+            background: var(--bg-surface);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            text-align: left;
+            transition: all var(--transition-fast);
+            margin-bottom: var(--space-sm);
+            font-size: var(--font-size-md);
+            cursor: pointer;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--primary);
+            background: var(--primary-glow);
+        }
+
+        .quiz-option.selected {
+            border-color: var(--primary);
+            background: var(--primary-glow);
+        }
+
+        .quiz-option.correct {
+            border-color: var(--accent-green) !important;
+            background: rgba(0, 200, 150, 0.15) !important;
+        }
+
+        .quiz-option.wrong {
+            border-color: var(--accent-pink) !important;
+            background: rgba(255, 64, 129, 0.15) !important;
+        }
+
+        .quiz-option.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .opt-label {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-full);
+            background: var(--bg-glass-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: var(--font-size-sm);
+            flex-shrink: 0;
+        }
+
+        .quiz-option.correct .opt-label {
+            background: var(--accent-green);
+            color: #000;
+        }
+
+        .quiz-option.wrong .opt-label {
+            background: var(--accent-pink);
+            color: #fff;
+        }
+
+        .opt-text {
+            flex: 1;
+        }
+
+        .quiz-nav-btns {
+            display: flex;
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
+        }
+
+        .quiz-nav-btns .btn {
+            flex: 1;
+        }
+
+        /* Result screen */
+        .result-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: var(--space-2xl);
+            text-align: center;
+            animation: scaleIn 0.4s ease;
+        }
+
+        .result-emoji {
+            font-size: 4rem;
+            margin-bottom: var(--space-md);
+        }
+
+        .result-score {
+            font-size: var(--font-size-3xl);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .result-percentage {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-top: var(--space-sm);
+        }
+
+        .result-message {
+            font-size: var(--font-size-md);
+            color: var(--text-secondary);
+            margin: var(--space-md) 0;
+        }
+
+        .result-actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            margin-top: var(--space-lg);
+        }
+    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <div class="loader-overlay" id="app-loader">
+        <div class="spinner"></div>
+        <div class="loader-text">ક્વિઝ લોડ થઈ રહ્યું છે...</div>
+    </div>
+
+    <main style="padding:var(--space-md);padding-top:var(--space-lg);min-height:100vh;">
+        <div class="quiz-container">
+
+            <!-- Quiz Header -->
+            <div class="quiz-header-bar" id="quizHeaderBar">
+                <button class="back-btn" onclick="confirmExit()"
+                    style="width:36px;height:36px;font-size:1rem;">✕</button>
+                <div class="quiz-counter"><span id="currentQ">1</span> / <span id="totalQ">0</span></div>
+                <div class="quiz-score-badge">⭐ <span id="liveScore">0</span></div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="quiz-progress" id="quizProgress">
+                <div class="quiz-progress-bar" id="quizProgressBar" style="width:0%"></div>
+            </div>
+
+            <!-- Ad between questions -->
+            <div class="ad-container" data-ad-slot="9999999901" data-ad-format="auto" id="quizAdTop"
+                style="display:none;"></div>
+
+            <!-- Question Area -->
+            <div id="questionArea">
+                <!-- Question card rendered here -->
+            </div>
+
+            <!-- Navigation -->
+            <div class="quiz-nav-btns" id="quizNavBtns" style="display:none;">
+                <button class="btn btn-secondary" onclick="nextQuestion()" id="nextBtn">આગળ →</button>
+            </div>
+
+            <!-- Result Area (hidden initially) -->
+            <div id="resultArea" style="display:none;"></div>
+
+        </div>
+    </main>
+
+    <script src="js/common.js"></script>
+    <script>
+        // ---- Quiz State ----
+        let questions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let answered = false;
+        let userAnswers = [];
+
+        // URL Params
+        const params = new URLSearchParams(window.location.search);
+        const categoryId = params.get('categoryId') || '';
+        const categoryName = params.get('categoryName') || 'Quiz';
+        const questionCount = parseInt(params.get('questionCount')) || 20;
+        const studentName = params.get('studentName') || '';
+        const mobile = params.get('mobile') || '';
+        const stdId = params.get('stdId') || '';
+        const subjectId = params.get('subjectId') || '';
+        const chapter = params.get('chapter') || '';
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            showLoader();
+
+            try {
+                const res = await api('getQuizQuestions', {
+                    categoryId, stdId, subjectId, chapter, limit: questionCount
+                });
+
+                if (res.success && res.data.length > 0) {
+                    questions = res.data;
+                    document.getElementById('totalQ').textContent = questions.length;
+                    renderQuestion();
+                } else {
+                    showNoQuestions();
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                showNoQuestions();
+            }
+
+            hideLoader();
+        });
+
+        function showNoQuestions() {
+            document.getElementById('questionArea').innerHTML = `
+        <div class="result-card">
+          <div class="result-emoji">😔</div>
+          <h2 style="margin-bottom:var(--space-md);">કોઈ પ્રશ્ન ઉપલબ્ધ નથી</h2>
+          <p style="color:var(--text-secondary);">આ કેટેગરીમાં હજુ સુધી કોઈ પ્રશ્ન ઉમેરાયા નથી.</p>
+          <button class="btn btn-primary btn-full mt-lg" onclick="window.location.href='quiz.html'">← પાછા જાઓ</button>
+        </div>
+      `;
+            document.getElementById('quizHeaderBar').style.display = 'none';
+            document.getElementById('quizProgress').style.display = 'none';
+        }
+
+        function renderQuestion() {
+            if (currentIndex >= questions.length) {
+                showResult();
+                return;
+            }
+
+            answered = false;
+            const q = questions[currentIndex];
+            document.getElementById('currentQ').textContent = currentIndex + 1;
+
+            // Progress
+            const progress = ((currentIndex) / questions.length) * 100;
+            document.getElementById('quizProgressBar').style.width = progress + '%';
+
+            // Show ad every 5 questions
+            const adEl = document.getElementById('quizAdTop');
+            adEl.style.display = (currentIndex > 0 && currentIndex % 5 === 0) ? 'flex' : 'none';
+
+            const options = [
+                { label: 'A', text: q.optA },
+                { label: 'B', text: q.optB },
+                { label: 'C', text: q.optC },
+                { label: 'D', text: q.optD }
+            ];
+
+            document.getElementById('questionArea').innerHTML = `
+        <div class="question-card">
+          <div class="question-number">પ્રશ્ન ${currentIndex + 1} / ${questions.length}</div>
+          <div class="question-text">${q.question}</div>
+          <div id="optionsArea">
+            ${options.map(opt => `
+              <button class="quiz-option" onclick="selectAnswer('${opt.label}', this)" data-label="${opt.label}">
+                <span class="opt-label">${opt.label}</span>
+                <span class="opt-text">${opt.text}</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+            document.getElementById('quizNavBtns').style.display = 'none';
+        }
+
+        function selectAnswer(selectedLabel, el) {
+            if (answered) return;
+            answered = true;
+
+            const q = questions[currentIndex];
+            const correctLabel = String(q.answer).toUpperCase();
+            const isCorrect = selectedLabel === correctLabel;
+
+            if (isCorrect) score++;
+            document.getElementById('liveScore').textContent = score;
+
+            userAnswers.push({
+                question: q.question,
+                selected: selectedLabel,
+                correct: correctLabel,
+                isCorrect
+            });
+
+            // Mark all options
+            document.querySelectorAll('.quiz-option').forEach(btn => {
+                btn.classList.add('disabled');
+                const label = btn.dataset.label;
+                if (label === correctLabel) btn.classList.add('correct');
+                if (label === selectedLabel && !isCorrect) btn.classList.add('wrong');
+            });
+
+            // Show next button
+            const navBtns = document.getElementById('quizNavBtns');
+            navBtns.style.display = 'flex';
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.textContent = (currentIndex + 1 >= questions.length) ? '📊 પરિણામ જુઓ' : 'આગળ →';
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex >= questions.length) {
+                showResult();
+            } else {
+                renderQuestion();
+            }
+        }
+
+        async function showResult() {
+            const total = questions.length;
+            const percentage = Math.round((score / total) * 100);
+
+            document.getElementById('quizHeaderBar').style.display = 'none';
+            document.getElementById('quizProgress').style.display = 'none';
+            document.getElementById('quizNavBtns').style.display = 'none';
+            document.getElementById('questionArea').style.display = 'none';
+
+            let emoji = '🎉';
+            let message = 'ઉત્તમ! તમે ખૂબ સારું કર્યું!';
+            if (percentage < 40) { emoji = '😔'; message = 'વધુ પ્રયાસ કરો. તમે કરી શકો છો!'; }
+            else if (percentage < 60) { emoji = '🙂'; message = 'સારું! થોડું વધુ પ્રેક્ટિસ કરો.'; }
+            else if (percentage < 80) { emoji = '😊'; message = 'ખૂબ સારું! તમે સારી રીતે તૈયાર છો.'; }
+
+            const resultArea = document.getElementById('resultArea');
+            resultArea.style.display = 'block';
+            resultArea.innerHTML = `
+        <div class="result-card">
+          <div class="result-emoji">${emoji}</div>
+          <div class="result-score">${score} / ${total}</div>
+          <div class="result-percentage">${percentage}%</div>
+          <div class="result-message">${message}</div>
+          <p style="font-size:var(--font-size-sm);color:var(--text-muted);">
+            ${studentName} | ${categoryName}
+          </p>
+          <div class="result-actions">
+            <a href="quiz-certificate.html?name=${encodeURIComponent(studentName)}&score=${score}&total=${total}&percentage=${percentage}&category=${encodeURIComponent(categoryName)}&date=${encodeURIComponent(new Date().toLocaleDateString('gu-IN'))}" class="btn btn-primary btn-full">
+              🏆 સર્ટિફિકેટ જુઓ & ડાઉનલોડ કરો
+            </a>
+            <button class="btn btn-secondary btn-full" onclick="window.location.href='quiz.html'">🔄 બીજી ક્વિઝ રમો</button>
+            <button class="btn btn-secondary btn-full" onclick="window.location.href='leaderboard.html'">🏆 લીડરબોર્ડ</button>
+            <button class="btn btn-secondary btn-full" onclick="window.location.href='index.html'">🏠 હોમ</button>
+          </div>
+        </div>
+
+        <div class="ad-container ad-container-rect mt-lg" data-ad-slot="9999999902" data-ad-format="auto"></div>
+
+        <!-- Answer Summary -->
+        <div class="section mt-lg">
+          <div class="section-title"><span class="icon">📋</span> જવાબ સારાંશ</div>
+          <div class="strip-list">
+            ${userAnswers.map((a, i) => `
+              <div class="strip-item" style="pointer-events:none;border-left:3px solid ${a.isCorrect ? 'var(--accent-green)' : 'var(--accent-pink)'};">
+                <div class="strip-icon" style="background:${a.isCorrect ? 'rgba(0,200,150,0.15)' : 'rgba(255,64,129,0.15)'}">${a.isCorrect ? '✅' : '❌'}</div>
+                <div class="strip-content">
+                  <div class="strip-title" style="white-space:normal;font-size:var(--font-size-sm);">${a.question}</div>
+                  <div class="strip-subtitle">
+                    તમારો જવાબ: ${a.selected} | સાચો જવાબ: ${a.correct}
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+            // Submit result to Google Sheet
+            try {
+                await api('submitQuizResult', {
+                    studentName, mobile, categoryId, categoryName,
+                    stdId, subjectId, chapter, score, total, percentage
+                });
+            } catch (err) {
+                console.error('Failed to submit result:', err);
+            }
+
+            initAdSlots();
+        }
+
+        function confirmExit() {
+            if (answered || currentIndex > 0) {
+                if (confirm('ક્વિઝ છોડવું છે? તમારો પ્રોગ્રેસ ખોવાઈ જશે.')) {
+                    window.location.href = 'quiz.html';
+                }
+            } else {
+                window.location.href = 'quiz.html';
+            }
+        }
+    </script>
+</body>
+
+</html>
