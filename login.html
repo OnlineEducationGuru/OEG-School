@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="gu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Login - Student & Teacher Login | Online Education Guru">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#6c63ff">
+    <title>Login - Online Education Guru</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+            background: var(--bg-gradient);
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: var(--space-2xl);
+            width: 100%;
+            max-width: 420px;
+            animation: scaleIn 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent-cyan), var(--accent-pink));
+        }
+
+        .auth-logo {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .auth-title {
+            text-align: center;
+            font-size: var(--font-size-xl);
+            font-weight: 800;
+            margin-bottom: var(--space-xs);
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .auth-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--space-xl);
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: var(--space-xl);
+            background: var(--bg-surface);
+            border-radius: var(--radius-md);
+            padding: 4px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: var(--space-sm);
+            text-align: center;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .auth-tab.active {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+            color: var(--text-muted);
+            font-size: var(--font-size-xs);
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: var(--space-lg);
+            font-size: var(--font-size-sm);
+            color: var(--text-muted);
+        }
+
+        .auth-footer a {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="loader-overlay" id="app-loader" style="display:none;">
+        <div class="spinner"></div>
+        <div class="loader-text">લોડ થઈ રહ્યું છે...</div>
+    </div>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+
+            <div class="auth-logo">📚</div>
+            <div class="auth-title">Online Education Guru</div>
+            <div class="auth-subtitle">તમારા એકાઉન્ટમાં લૉગિન કરો</div>
+
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchTab('student', this)">👨‍🎓 વિદ્યાર્થી</button>
+                <button class="auth-tab" onclick="switchTab('teacher', this)">👨‍🏫 શિક્ષક</button>
+            </div>
+
+            <!-- Student Login Form -->
+            <div class="auth-form active" id="form-student">
+                <div class="form-group">
+                    <label class="form-label">મોબાઈલ નંબર</label>
+                    <input type="tel" class="form-input" id="stuMobile" maxlength="10"
+                        placeholder="10 અંકનો મોબાઈલ નંબર">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">પાસવર્ડ</label>
+                    <input type="password" class="form-input" id="stuPassword" placeholder="પાસવર્ડ">
+                </div>
+                <button class="btn btn-primary btn-full mt-md" onclick="loginStudent()">🔐 લૉગિન</button>
+            </div>
+
+            <!-- Teacher Login Form -->
+            <div class="auth-form" id="form-teacher">
+                <div class="form-group">
+                    <label class="form-label">મોબાઈલ નંબર</label>
+                    <input type="tel" class="form-input" id="tchMobile" maxlength="10"
+                        placeholder="10 અંકનો મોબાઈલ નંબર">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">પાસવર્ડ</label>
+                    <input type="password" class="form-input" id="tchPassword" placeholder="પાસવર્ડ">
+                </div>
+                <button class="btn btn-primary btn-full mt-md" onclick="loginTeacher()">🔐 લૉગિન</button>
+            </div>
+
+            <div class="auth-divider">OR</div>
+
+            <div class="auth-footer">
+                નવા છો? <a href="register.html">અહીં રજિસ્ટર કરો →</a>
+            </div>
+            <div class="auth-footer" style="margin-top:var(--space-sm);">
+                <a href="index.html">← હોમ પર પાછા જાઓ</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        // Redirect if already logged in
+        if (getUser()) window.location.href = 'index.html';
+
+        function switchTab(tab, el) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('form-' + tab).classList.add('active');
+        }
+
+        async function loginStudent() {
+            const mobile = document.getElementById('stuMobile').value.trim();
+            const password = document.getElementById('stuPassword').value.trim();
+
+            if (!mobile || !isValidMobile(mobile)) { showToast('સાચો 10 અંકનો મોબાઈલ નંબર નાખો', 'error'); return; }
+            if (!password) { showToast('પાસવર્ડ નાખો', 'error'); return; }
+
+            showLoader('Login...');
+            try {
+                const res = await api('studentLogin', { mobile, password });
+                if (res.success) {
+                    userLogin({ name: res.data.name, mobile: res.data.mobile, role: 'student' });
+                    showToast('Login successful!', 'success');
+                    setTimeout(() => window.location.href = 'index.html', 800);
+                } else {
+                    showToast(res.error || 'Login failed', 'error');
+                }
+            } catch (err) {
+                showToast('Login error', 'error');
+            }
+            hideLoader();
+        }
+
+        async function loginTeacher() {
+            const mobile = document.getElementById('tchMobile').value.trim();
+            const password = document.getElementById('tchPassword').value.trim();
+
+            if (!mobile || !isValidMobile(mobile)) { showToast('સાચો 10 અંકનો મોબાઈલ નંબર નાખો', 'error'); return; }
+            if (!password) { showToast('પાસવર્ડ નાખો', 'error'); return; }
+
+            showLoader('Login...');
+            try {
+                const res = await api('teacherLogin', { mobile, password });
+                if (res.success) {
+                    userLogin({ name: res.data.name, mobile: res.data.mobile, role: 'teacher' });
+                    showToast('Login successful!', 'success');
+                    setTimeout(() => window.location.href = 'index.html', 800);
+                } else {
+                    showToast(res.error || 'Login failed', 'error');
+                }
+            } catch (err) {
+                showToast('Login error', 'error');
+            }
+            hideLoader();
+        }
+
+        // Enter key support
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    const form = this.closest('.auth-form');
+                    if (form.id === 'form-student') loginStudent();
+                    else loginTeacher();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

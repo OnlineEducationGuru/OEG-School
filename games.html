@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="gu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="ઈન્ટર એક્ટીવ ગેમ્સ - Educational Games | Online Education Guru">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#6c63ff">
+    <title>ઈન્ટર એક્ટીવ ગેમ્સ - Online Education Guru</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .subject-tab-bar {
+            display: flex;
+            gap: 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: var(--space-lg);
+        }
+
+        .subject-tab-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .subject-tab {
+            flex-shrink: 0;
+            padding: var(--space-sm) var(--space-lg);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+            background: none;
+        }
+
+        .subject-tab:hover,
+        .subject-tab.active {
+            color: var(--primary-light);
+            border-bottom-color: var(--primary);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+        }
+
+        .game-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            animation: fadeInUp 0.4s ease both;
+            text-decoration: none;
+            color: var(--text-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--primary), var(--accent-pink));
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        .game-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-glow);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .game-card:hover::before {
+            opacity: 1;
+        }
+
+        .game-card:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .game-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto var(--space-sm);
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(108, 99, 255, 0.15));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .game-name {
+            font-size: var(--font-size-sm);
+            font-weight: 700;
+        }
+
+        .game-subject {
+            font-size: var(--font-size-xs);
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .game-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .game-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .game-card:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .game-card:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+
+        .game-card:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .game-card:nth-child(6) {
+            animation-delay: 0.3s;
+        }
+
+        @media (min-width: 768px) {
+            .games-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .games-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <header class="site-header" id="site-header"></header>
+    <div class="news-ticker" id="news-ticker"></div>
+    <div class="loader-overlay" id="app-loader">
+        <div class="spinner"></div>
+        <div class="loader-text">લોડ થઈ રહ્યું છે...</div>
+    </div>
+
+    <main class="page-wrapper">
+        <div class="container">
+
+            <div class="page-header">
+                <button class="back-btn" onclick="history.back()">←</button>
+                <h1 class="page-title">🎮 ઈન્ટર એક્ટીવ ગેમ્સ</h1>
+            </div>
+
+            <!-- Description -->
+            <div
+                style="background:linear-gradient(135deg, rgba(0,200,150,0.08), rgba(0,229,255,0.05)); border:1px solid rgba(0,200,150,0.15); border-radius:var(--radius-lg); padding:var(--space-lg); margin-bottom:var(--space-lg); animation: fadeInUp 0.3s ease;">
+                <p style="font-size:var(--font-size-sm); color:var(--text-secondary); line-height:1.8;">
+                    🎮 શૈક્ષણિક ઈન્ટર એક્ટીવ ગેમ્સ રમો! વિષય પસંદ કરો અને રમવાનું શરૂ કરો.
+                </p>
+            </div>
+
+            <div class="ad-container" data-ad-slot="7777777701" data-ad-format="auto"></div>
+
+            <!-- Subject Tab Bar -->
+            <div class="subject-tab-bar" id="subjectTabBar">
+                <button class="subject-tab active" onclick="filterGames('all', this)">🎮 બધા</button>
+            </div>
+
+            <!-- Games Grid -->
+            <div class="games-grid" id="gamesGrid">
+                <!-- Loaded dynamically -->
+            </div>
+
+            <div class="ad-container ad-container-rect" data-ad-slot="7777777702" data-ad-format="auto"></div>
+
+        </div>
+    </main>
+
+    <footer class="site-footer" id="site-footer"></footer>
+
+    <script src="js/common.js"></script>
+    <script>
+        let allGames = [];
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            showLoader();
+
+            try {
+                const res = await apiCached('getGames');
+                if (res.success && res.data.length > 0) {
+                    allGames = res.data;
+                    buildSubjectTabs();
+                    renderGames(allGames);
+                } else {
+                    renderDefaultGames();
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                renderDefaultGames();
+            }
+
+            hideLoader();
+        });
+
+        function buildSubjectTabs() {
+            const subjects = [...new Set(allGames.map(g => g.subject).filter(Boolean))];
+            const tabBar = document.getElementById('subjectTabBar');
+            tabBar.innerHTML = `<button class="subject-tab active" onclick="filterGames('all', this)">🎮 બધા</button>` +
+                subjects.map(s => `<button class="subject-tab" onclick="filterGames('${s}', this)">${s}</button>`).join('');
+        }
+
+        function filterGames(subject, el) {
+            document.querySelectorAll('.subject-tab').forEach(t => t.classList.remove('active'));
+            if (el) el.classList.add('active');
+
+            const filtered = subject === 'all' ? allGames : allGames.filter(g => g.subject === subject);
+            renderGames(filtered);
+        }
+
+        function renderGames(games) {
+            const grid = document.getElementById('gamesGrid');
+            if (!games || games.length === 0) {
+                grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">🎮</div><div class="empty-text">કોઈ ગેમ ઉપલબ્ધ નથી</div></div>';
+                return;
+            }
+            grid.innerHTML = games.map((g, i) => `
+        <a href="${g.fileUrl || '#'}" target="_blank" class="game-card" style="animation-delay:${i * 0.06}s">
+          <div class="game-icon">${g.icon || '🎮'}</div>
+          <div class="game-name">${g.name || ''}</div>
+          <div class="game-subject">${g.subject || ''}</div>
+        </a>
+      `).join('');
+        }
+
+        function renderDefaultGames() {
+            allGames = [
+                { name: 'ગુજરાતી અક્ષર ઓળખ', icon: '🔤', subject: 'ગુજરાતી' },
+                { name: 'Word Puzzle', icon: '🧩', subject: 'English' },
+                { name: 'ગણિત Quiz Game', icon: '🔢', subject: 'ગણિત' },
+                { name: 'Science Explorer', icon: '🔬', subject: 'વિજ્ઞાન' },
+                { name: 'Map Quiz', icon: '🗺️', subject: 'સામાજિક વિજ્ઞાન' },
+                { name: 'Memory Match', icon: '🧠', subject: 'GK' },
+                { name: 'Spelling Bee', icon: '🐝', subject: 'English' },
+                { name: 'ગુણાકાર રેસ', icon: '🏎️', subject: 'ગણિત' }
+            ];
+            buildSubjectTabs();
+            renderGames(allGames);
+        }
+    </script>
+</body>
+
+</html>

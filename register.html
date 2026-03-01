@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="gu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Register - Student & Teacher Registration | Online Education Guru">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#6c63ff">
+    <title>Register - Online Education Guru</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+            background: var(--bg-gradient);
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: var(--space-2xl);
+            width: 100%;
+            max-width: 450px;
+            animation: scaleIn 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan), var(--primary));
+        }
+
+        .auth-logo {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .auth-title {
+            text-align: center;
+            font-size: var(--font-size-xl);
+            font-weight: 800;
+            margin-bottom: var(--space-xs);
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .auth-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--space-xl);
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: var(--space-xl);
+            background: var(--bg-surface);
+            border-radius: var(--radius-md);
+            padding: 4px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: var(--space-sm);
+            text-align: center;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .auth-tab.active {
+            background: var(--accent-green);
+            color: #000;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .otp-section {
+            display: none;
+        }
+
+        .otp-section.active {
+            display: block;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: var(--space-lg);
+            font-size: var(--font-size-sm);
+            color: var(--text-muted);
+        }
+
+        .auth-footer a {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-sm);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="loader-overlay" id="app-loader" style="display:none;">
+        <div class="spinner"></div>
+        <div class="loader-text">રજિસ્ટર થઈ રહ્યું છે...</div>
+    </div>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+
+            <div class="auth-logo">📝</div>
+            <div class="auth-title">રજિસ્ટ્રેશન</div>
+            <div class="auth-subtitle">નવું એકાઉન્ટ બનાવો</div>
+
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchRegTab('student', this)">👨‍🎓 વિદ્યાર્થી</button>
+                <button class="auth-tab" onclick="switchRegTab('teacher', this)">👨‍🏫 શિક્ષક</button>
+            </div>
+
+            <!-- Student Registration -->
+            <div class="auth-form active" id="reg-student">
+                <div class="form-group">
+                    <label class="form-label">નામ *</label>
+                    <input type="text" class="form-input" id="stuRegName" placeholder="પૂરું નામ">
+                </div>
+                <div class="two-col">
+                    <div class="form-group">
+                        <label class="form-label">ધોરણ</label>
+                        <select class="form-select" id="stuRegStd">
+                            <option value="">ધોરણ</option>
+                            <option>બાલ વાટિકા</option>
+                            <option>ધોરણ 1</option>
+                            <option>ધોરણ 2</option>
+                            <option>ધોરણ 3</option>
+                            <option>ધોરણ 4</option>
+                            <option>ધોરણ 5</option>
+                            <option>ધોરણ 6</option>
+                            <option>ધોરણ 7</option>
+                            <option>ધોરણ 8</option>
+                            <option>ધોરણ 9</option>
+                            <option>ધોરણ 10</option>
+                            <option>ધોરણ 11</option>
+                            <option>ધોરણ 12</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">શાળાનું નામ</label>
+                        <input type="text" class="form-input" id="stuRegSchool" placeholder="શાળા">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">મોબાઈલ *</label>
+                    <input type="tel" class="form-input" id="stuRegMobile" maxlength="10" placeholder="10 અંકનો મોબાઈલ">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">પાસવર્ડ *</label>
+                    <input type="password" class="form-input" id="stuRegPass" placeholder="ઓછામાં ઓછા 6 અક્ષર">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">પાસવર્ડ ફરી નાખો *</label>
+                    <input type="password" class="form-input" id="stuRegPassConfirm" placeholder="પાસવર્ડ ફરી">
+                </div>
+                <button class="btn btn-primary btn-full mt-md" onclick="registerStudent()">📝 રજિસ્ટર</button>
+            </div>
+
+            <!-- Teacher Registration -->
+            <div class="auth-form" id="reg-teacher">
+                <div class="form-group">
+                    <label class="form-label">નામ *</label>
+                    <input type="text" class="form-input" id="tchRegName" placeholder="પૂરું નામ">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">શાળાનું નામ *</label>
+                    <input type="text" class="form-input" id="tchRegSchool" placeholder="શાળાનું નામ">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">મોબાઈલ *</label>
+                    <input type="tel" class="form-input" id="tchRegMobile" maxlength="10" placeholder="10 અંકનો મોબાઈલ">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email *</label>
+                    <input type="email" class="form-input" id="tchRegEmail" placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">પાસવર્ડ *</label>
+                    <input type="password" class="form-input" id="tchRegPass" placeholder="ઓછામાં ઓછા 6 અક્ષર">
+                </div>
+                <button class="btn btn-primary btn-full mt-md" id="tchRegBtn" onclick="registerTeacher()">📝 રજિસ્ટર &
+                    OTP મોકલો</button>
+
+                <!-- OTP Verification -->
+                <div class="otp-section" id="otpSection">
+                    <div
+                        style="margin-top:var(--space-lg);padding-top:var(--space-lg);border-top:1px solid var(--border-color);">
+                        <p
+                            style="font-size:var(--font-size-sm);color:var(--text-secondary);margin-bottom:var(--space-md);">
+                            📧 તમારા Email પર OTP મોકલ્યો છે. કૃપયા ચકાસો.
+                        </p>
+                        <div class="form-group">
+                            <label class="form-label">OTP Code</label>
+                            <input type="text" class="form-input" id="tchOtp" maxlength="6" placeholder="6 Digit OTP"
+                                style="text-align:center;font-size:var(--font-size-xl);letter-spacing:8px;">
+                        </div>
+                        <button class="btn btn-success btn-full" onclick="verifyTeacherOTP()">✅ OTP ચકાસો</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-footer">
+                પહેલાથી એકાઉન્ટ છે? <a href="login.html">લૉગિન કરો →</a>
+            </div>
+            <div class="auth-footer" style="margin-top:var(--space-sm);">
+                <a href="index.html">← હોમ</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        function switchRegTab(tab, el) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('reg-' + tab).classList.add('active');
+        }
+
+        async function registerStudent() {
+            const name = document.getElementById('stuRegName').value.trim();
+            const std = document.getElementById('stuRegStd').value;
+            const school = document.getElementById('stuRegSchool').value.trim();
+            const mobile = document.getElementById('stuRegMobile').value.trim();
+            const pass = document.getElementById('stuRegPass').value;
+            const passConfirm = document.getElementById('stuRegPassConfirm').value;
+
+            if (!name) { showToast('નામ નાખો', 'error'); return; }
+            if (!mobile || !isValidMobile(mobile)) { showToast('સાચો 10 અંકનો મોબાઈલ', 'error'); return; }
+            if (!pass || pass.length < 6) { showToast('પાસવર્ડ ઓછામાં ઓછા 6 અક્ષરનો હોવો જોઈએ', 'error'); return; }
+            if (pass !== passConfirm) { showToast('બંને પાસવર્ડ મેચ નથી થતા', 'error'); return; }
+
+            showLoader('Registering...');
+            try {
+                const res = await api('registerStudent', { name, standard: std, school, mobile, password: pass });
+                if (res.success) {
+                    showToast('રજિસ્ટ્રેશન સફળ! હવે Login કરો.', 'success');
+                    setTimeout(() => window.location.href = 'login.html', 1500);
+                } else {
+                    showToast(res.error || 'Registration failed', 'error');
+                }
+            } catch (err) {
+                showToast('Error', 'error');
+            }
+            hideLoader();
+        }
+
+        let teacherRegData = {};
+
+        async function registerTeacher() {
+            const name = document.getElementById('tchRegName').value.trim();
+            const school = document.getElementById('tchRegSchool').value.trim();
+            const mobile = document.getElementById('tchRegMobile').value.trim();
+            const email = document.getElementById('tchRegEmail').value.trim();
+            const pass = document.getElementById('tchRegPass').value;
+
+            if (!name) { showToast('નામ નાખો', 'error'); return; }
+            if (!school) { showToast('શાળાનું નામ નાખો', 'error'); return; }
+            if (!mobile || !isValidMobile(mobile)) { showToast('સાચો 10 અંકનો મોબાઈલ', 'error'); return; }
+            if (!email || !email.includes('@')) { showToast('સાચો Email નાખો', 'error'); return; }
+            if (!pass || pass.length < 6) { showToast('પાસવર્ડ ઓછામાં ઓછા 6 અક્ષરનો', 'error'); return; }
+
+            showLoader('OTP Sending...');
+            teacherRegData = { name, school, mobile, email, password: pass };
+
+            try {
+                const res = await api('registerTeacher', teacherRegData);
+                if (res.success) {
+                    document.getElementById('otpSection').classList.add('active');
+                    document.getElementById('tchRegBtn').disabled = true;
+                    document.getElementById('tchRegBtn').textContent = 'OTP મોકલ્યો ✓';
+                    showToast('OTP તમારા Email પર મોકલ્યો!', 'success');
+                } else {
+                    showToast(res.error || 'Registration failed', 'error');
+                }
+            } catch (err) {
+                showToast('Error', 'error');
+            }
+            hideLoader();
+        }
+
+        async function verifyTeacherOTP() {
+            const otp = document.getElementById('tchOtp').value.trim();
+            if (!otp || otp.length < 4) { showToast('OTP નાખો', 'error'); return; }
+
+            showLoader('Verifying OTP...');
+            try {
+                const res = await api('verifyTeacherOTP', { mobile: teacherRegData.mobile, otp });
+                if (res.success) {
+                    showToast('ચકાસણી સફળ! હવે Login કરો.', 'success');
+                    setTimeout(() => window.location.href = 'login.html', 1500);
+                } else {
+                    showToast(res.error || 'OTP wrong', 'error');
+                }
+            } catch (err) {
+                showToast('Error', 'error');
+            }
+            hideLoader();
+        }
+    </script>
+</body>
+
+</html>

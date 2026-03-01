@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="gu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="ક્વિઝ - Online Quiz with Certificate | Online Education Guru">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#6c63ff">
+    <title>ક્વિઝ - Online Education Guru</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .quiz-cat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+        }
+
+        .quiz-cat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            animation: fadeInUp 0.4s ease both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-cat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent-cyan));
+            transform: scaleX(0);
+            transition: transform var(--transition-normal);
+        }
+
+        .quiz-cat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-glow);
+            border-color: var(--border-glow);
+        }
+
+        .quiz-cat-card:hover::after {
+            transform: scaleX(1);
+        }
+
+        .quiz-cat-card:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .qc-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .qc-name {
+            font-size: var(--font-size-md);
+            font-weight: 700;
+        }
+
+        .qc-count {
+            font-size: var(--font-size-xs);
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .quiz-cat-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .quiz-cat-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .quiz-cat-card:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .quiz-cat-card:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+
+        .quiz-cat-card:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .quiz-cat-card:nth-child(6) {
+            animation-delay: 0.3s;
+        }
+
+        .quiz-setup-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            animation: scaleIn 0.3s ease;
+        }
+
+        .quiz-setup-title {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        @media (min-width: 768px) {
+            .quiz-cat-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <header class="site-header" id="site-header"></header>
+    <div class="news-ticker" id="news-ticker"></div>
+    <div class="loader-overlay" id="app-loader">
+        <div class="spinner"></div>
+        <div class="loader-text">લોડ થઈ રહ્યું છે...</div>
+    </div>
+
+    <main class="page-wrapper">
+        <div class="container">
+
+            <div class="page-header">
+                <button class="back-btn" onclick="history.back()">←</button>
+                <h1 class="page-title">❓ ક્વિઝ</h1>
+            </div>
+
+            <div class="ad-container" data-ad-slot="8888888801" data-ad-format="auto"></div>
+
+            <!-- Quiz Categories Grid -->
+            <section class="section" id="categoriesSection">
+                <div class="section-title">
+                    <span class="icon">🏆</span>
+                    ક્વિઝ કેટેગરી પસંદ કરો
+                </div>
+                <div class="quiz-cat-grid" id="quizCatGrid"></div>
+            </section>
+
+            <div class="ad-container" data-ad-slot="8888888802" data-ad-format="auto"></div>
+
+            <!-- Quiz Setup Form (shown after category selection) -->
+            <section class="section hidden" id="setupSection">
+                <div class="quiz-setup-card">
+                    <div class="quiz-setup-title">📝 <span id="setupCatName">Quiz Setup</span></div>
+
+                    <!-- Dropdown for Standard (shown only for Std-wise quiz) -->
+                    <div class="form-group hidden" id="stdDropdownGroup">
+                        <label class="form-label">ધોરણ પસંદ કરો</label>
+                        <select class="form-select" id="quizStdSelect" onchange="loadQuizSubjects()">
+                            <option value="">ધોરણ પસંદ કરો...</option>
+                        </select>
+                    </div>
+
+                    <!-- Subject Dropdown -->
+                    <div class="form-group hidden" id="subjectDropdownGroup">
+                        <label class="form-label">વિષય પસંદ કરો</label>
+                        <select class="form-select" id="quizSubjectSelect" onchange="loadQuizChapters()">
+                            <option value="">વિષય પસંદ કરો...</option>
+                        </select>
+                    </div>
+
+                    <!-- Chapter Dropdown -->
+                    <div class="form-group hidden" id="chapterDropdownGroup">
+                        <label class="form-label">ચેપ્ટર પસંદ કરો</label>
+                        <select class="form-select" id="quizChapterSelect">
+                            <option value="">ચેપ્ટર પસંદ કરો...</option>
+                        </select>
+                    </div>
+
+                    <!-- Student Info -->
+                    <div class="form-group">
+                        <label class="form-label">વિદ્યાર્થીનું નામ *</label>
+                        <input class="form-input" id="quizStudentName" placeholder="તમારું નામ લખો">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">મોબાઈલ નંબર *</label>
+                        <input class="form-input" id="quizMobile" type="tel" maxlength="10"
+                            placeholder="10 અંકનો મોબાઈલ નંબર">
+                    </div>
+
+                    <button class="btn btn-primary btn-full mt-lg" onclick="startQuiz()" id="startQuizBtn">
+                        🚀 ક્વિઝ શરૂ કરો
+                    </button>
+                </div>
+            </section>
+
+            <!-- Leaderboard Preview -->
+            <section class="section" id="leaderboardSection">
+                <div class="section-title">
+                    <span class="icon">🏆</span>
+                    ટોપ સ્કોરર્સ
+                </div>
+                <div class="leaderboard-list" id="quizLeaderboard"></div>
+                <div class="text-center mt-md">
+                    <a href="leaderboard.html" class="btn btn-secondary btn-sm">બધા જુઓ →</a>
+                </div>
+            </section>
+
+            <div class="ad-container ad-container-rect" data-ad-slot="8888888803" data-ad-format="auto"></div>
+
+        </div>
+    </main>
+
+    <footer class="site-footer" id="site-footer"></footer>
+
+    <script src="js/common.js"></script>
+    <script>
+        let quizCategories = [];
+        let selectedCategoryId = null;
+        let selectedCategoryName = '';
+        let selectedQuestionCount = 20;
+        let allStandards = [];
+        let allSubjects = [];
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            showLoader();
+
+            try {
+                // Load quiz categories
+                const catRes = await apiCached('getQuizCategories');
+                quizCategories = catRes.success ? catRes.data : getDefaultCategories();
+                renderCategories();
+
+                // Load leaderboard
+                const lbRes = await apiCached('getLeaderboard');
+                if (lbRes.success) {
+                    renderLeaderboard(lbRes.data, 'quizLeaderboard', 5);
+                }
+
+                // Preload standards & subjects
+                const stdRes = await apiCached('getStandards');
+                allStandards = stdRes.success ? stdRes.data : [];
+                const subRes = await apiCached('getSubjects');
+                allSubjects = subRes.success ? subRes.data : [];
+
+            } catch (err) {
+                console.error('Error:', err);
+                quizCategories = getDefaultCategories();
+                renderCategories();
+            }
+
+            hideLoader();
+        });
+
+        function renderCategories() {
+            const grid = document.getElementById('quizCatGrid');
+            grid.innerHTML = quizCategories.map((cat, i) => `
+        <div class="quiz-cat-card" onclick="selectCategory('${cat.id}', '${cat.name}', ${cat.questionCount || 20})" style="animation-delay:${i * 0.08}s">
+          <div class="qc-icon">${cat.icon || '❓'}</div>
+          <div class="qc-name">${cat.name}</div>
+          <div class="qc-count">${cat.questionCount || 20} પ્રશ્ન</div>
+        </div>
+      `).join('');
+        }
+
+        function selectCategory(catId, catName, questionCount) {
+            selectedCategoryId = catId;
+            selectedCategoryName = catName;
+            selectedQuestionCount = questionCount;
+
+            // Highlight
+            document.querySelectorAll('.quiz-cat-card').forEach((c, i) => {
+                const isSelected = quizCategories[i] && String(quizCategories[i].id) === String(catId);
+                c.style.opacity = isSelected ? '1' : '0.4';
+                c.style.borderColor = isSelected ? 'var(--primary)' : '';
+            });
+
+            document.getElementById('setupCatName').textContent = catName;
+
+            const setupSection = document.getElementById('setupSection');
+            setupSection.classList.remove('hidden');
+
+            // Show standard dropdown only for "ધોરણ વાઈઝ Quiz" (id=1)
+            const isStdWise = String(catId) === '1';
+            document.getElementById('stdDropdownGroup').classList.toggle('hidden', !isStdWise);
+            document.getElementById('subjectDropdownGroup').classList.toggle('hidden', !isStdWise);
+            document.getElementById('chapterDropdownGroup').classList.toggle('hidden', !isStdWise);
+
+            if (isStdWise) {
+                const stdSelect = document.getElementById('quizStdSelect');
+                stdSelect.innerHTML = '<option value="">ધોરણ પસંદ કરો...</option>' +
+                    allStandards.map(s => `<option value="${s.id}">${s.standardName}</option>`).join('');
+            }
+
+            // Pre-fill from login
+            const user = getUser();
+            if (user) {
+                document.getElementById('quizStudentName').value = user.name || '';
+                document.getElementById('quizMobile').value = user.mobile || '';
+            }
+
+            setupSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function loadQuizSubjects() {
+            const stdId = document.getElementById('quizStdSelect').value;
+            if (!stdId) return;
+            document.getElementById('subjectDropdownGroup').classList.remove('hidden');
+            const subSelect = document.getElementById('quizSubjectSelect');
+            subSelect.innerHTML = '<option value="">વિષય પસંદ કરો...</option>' +
+                allSubjects.map(s => `<option value="${s.id}">${s.subjectName}</option>`).join('');
+        }
+
+        async function loadQuizChapters() {
+            const stdId = document.getElementById('quizStdSelect').value;
+            const subjectId = document.getElementById('quizSubjectSelect').value;
+            if (!stdId || !subjectId) return;
+
+            document.getElementById('chapterDropdownGroup').classList.remove('hidden');
+            const chapSelect = document.getElementById('quizChapterSelect');
+            chapSelect.innerHTML = '<option value="">લોડ થઈ રહ્યું...</option>';
+
+            try {
+                const res = await api('getQuizQuestions', { categoryId: selectedCategoryId, stdId, subjectId });
+                if (res.success) {
+                    const chapters = [...new Set(res.data.map(q => q.chapter).filter(Boolean))];
+                    chapSelect.innerHTML = '<option value="">બધા ચેપ્ટર</option>' +
+                        chapters.map(c => `<option value="${c}">${c}</option>`).join('');
+                }
+            } catch (err) {
+                chapSelect.innerHTML = '<option value="">ચેપ્ટર લોડ થયા નથી</option>';
+            }
+        }
+
+        function startQuiz() {
+            const name = document.getElementById('quizStudentName').value.trim();
+            const mobile = document.getElementById('quizMobile').value.trim();
+
+            if (!name) { showToast('કૃપયા તમારું નામ લખો', 'error'); return; }
+            if (!mobile || !isValidMobile(mobile)) {
+                showToast('કૃપયા 10 અંકનો સાચો મોબાઈલ નંબર નાખો', 'error');
+                return;
+            }
+
+            // Build quiz URL params
+            const params = new URLSearchParams();
+            params.set('categoryId', selectedCategoryId);
+            params.set('categoryName', selectedCategoryName);
+            params.set('questionCount', selectedQuestionCount);
+            params.set('studentName', name);
+            params.set('mobile', mobile);
+
+            if (String(selectedCategoryId) === '1') {
+                const stdId = document.getElementById('quizStdSelect').value;
+                const subjectId = document.getElementById('quizSubjectSelect').value;
+                const chapter = document.getElementById('quizChapterSelect').value;
+                if (stdId) params.set('stdId', stdId);
+                if (subjectId) params.set('subjectId', subjectId);
+                if (chapter) params.set('chapter', chapter);
+            }
+
+            window.location.href = 'quiz-play.html?' + params.toString();
+        }
+
+        function getDefaultCategories() {
+            return [
+                { id: 1, name: 'ધોરણ વાઈઝ Quiz', icon: '📖', questionCount: 20 },
+                { id: 2, name: 'GK Quiz', icon: '🧠', questionCount: 25 },
+                { id: 3, name: 'NMMS Quiz', icon: '🏆', questionCount: 30 },
+                { id: 4, name: 'PSE Quiz', icon: '📋', questionCount: 25 },
+                { id: 5, name: 'CET Quiz', icon: '🎯', questionCount: 30 },
+                { id: 6, name: 'Gyan Sadhana Quiz', icon: '📚', questionCount: 20 }
+            ];
+        }
+    </script>
+</body>
+
+</html>

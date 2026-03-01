@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="gu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="ધોરણ - Standard Materials | Online Education Guru">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#6c63ff">
+    <title>ધોરણ - Online Education Guru</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .material-type-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+        }
+
+        .type-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            animation: fadeInUp 0.4s ease both;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .type-card:hover {
+            border-color: var(--border-glow);
+            box-shadow: var(--shadow-glow);
+            transform: translateY(-3px);
+        }
+
+        .type-card:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .type-card .type-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .type-card .type-name {
+            font-size: var(--font-size-md);
+            font-weight: 700;
+        }
+
+        .type-card .type-desc {
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .type-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .type-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .type-card:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .type-card:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+
+        .type-card:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .type-card:nth-child(6) {
+            animation-delay: 0.3s;
+        }
+
+        .subject-chips {
+            display: flex;
+            gap: var(--space-sm);
+            overflow-x: auto;
+            padding: var(--space-sm) 0;
+            scrollbar-width: none;
+        }
+
+        .subject-chips::-webkit-scrollbar {
+            display: none;
+        }
+
+        .subject-chip {
+            flex-shrink: 0;
+            padding: 8px 18px;
+            border-radius: 100px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+            color: var(--text-primary);
+        }
+
+        .subject-chip:hover,
+        .subject-chip.active {
+            background: var(--primary-glow);
+            border-color: var(--primary);
+            color: var(--primary-light);
+        }
+
+        .std-banner {
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.15), rgba(0, 229, 255, 0.08));
+            border: 1px solid rgba(108, 99, 255, 0.2);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            text-align: center;
+            margin-bottom: var(--space-lg);
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .std-banner-icon {
+            font-size: 3rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .std-banner-name {
+            font-size: var(--font-size-2xl);
+            font-weight: 800;
+        }
+
+        .std-banner-sub {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <header class="site-header" id="site-header"></header>
+    <div class="news-ticker" id="news-ticker"></div>
+    <div class="loader-overlay" id="app-loader">
+        <div class="spinner"></div>
+        <div class="loader-text">લોડ થઈ રહ્યું છે...</div>
+    </div>
+
+    <main class="page-wrapper">
+        <div class="container">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <button class="back-btn" onclick="history.back()">←</button>
+                <h1 class="page-title" id="pageTitle">📖 ધોરણ</h1>
+            </div>
+
+            <!-- Standard Banner -->
+            <div class="std-banner" id="stdBanner">
+                <div class="std-banner-icon" id="stdIcon">📖</div>
+                <div class="std-banner-name" id="stdName">ધોરણ</div>
+                <div class="std-banner-sub">Online Education Guru</div>
+            </div>
+
+            <!-- Ad Banner -->
+            <div class="ad-container" data-ad-slot="6666666601" data-ad-format="auto"></div>
+
+            <!-- Material Type Grid -->
+            <section class="section" id="typeSection">
+                <div class="section-title">
+                    <span class="icon">📁</span>
+                    સામગ્રી પ્રકાર
+                </div>
+                <div class="material-type-grid" id="typeGrid">
+                    <!-- Loaded dynamically or defaults -->
+                </div>
+            </section>
+
+            <!-- Ad Banner -->
+            <div class="ad-container" data-ad-slot="6666666602" data-ad-format="auto"></div>
+
+            <!-- Subject Filter (shown after type selection) -->
+            <section class="section hidden" id="subjectSection">
+                <div class="section-title">
+                    <span class="icon">📚</span>
+                    <span id="selectedTypeName">વિષય</span> - વિષય પસંદ કરો
+                </div>
+                <div class="subject-chips" id="subjectChips"></div>
+            </section>
+
+            <!-- Materials List -->
+            <section class="section hidden" id="materialsSection">
+                <div class="section-title">
+                    <span class="icon">📄</span>
+                    <span id="materialsTitle">મટિરિયલ્સ</span>
+                </div>
+                <div class="strip-list" id="materialsList"></div>
+            </section>
+
+            <!-- Ad Banner Bottom -->
+            <div class="ad-container ad-container-rect" data-ad-slot="6666666603" data-ad-format="auto"></div>
+
+        </div>
+    </main>
+
+    <footer class="site-footer" id="site-footer"></footer>
+
+    <script src="js/common.js"></script>
+    <script>
+        let standardId = null;
+        let standardData = null;
+        let selectedType = null;
+        let selectedSubjectId = null;
+        let allSubjects = [];
+
+        const typeConfig = [
+            { type: 'textbook', name: 'પાઠ્યપુસ્તક', icon: '📕', desc: 'Textbooks' },
+            { type: 'workbook', name: 'સ્વાધ્યાયપોથી', icon: '📗', desc: 'Workbooks' },
+            { type: 'testpaper', name: 'ટેસ્ટ પેપર', icon: '📝', desc: 'Test Papers' },
+            { type: 'solution', name: 'પેપર સોલ્યુશન', icon: '✅', desc: 'Solutions' },
+            { type: 'worksheet', name: 'વર્કશીટ', icon: '📋', desc: 'Worksheets' },
+            { type: 'other', name: 'અન્ય', icon: '📂', desc: 'Other Materials' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            showLoader();
+            standardId = getUrlParam('id');
+
+            try {
+                // Load standard info
+                const stdRes = await apiCached('getStandards');
+                if (stdRes.success) {
+                    standardData = stdRes.data.find(s => String(s.id) === String(standardId));
+                }
+
+                if (standardData) {
+                    document.getElementById('stdIcon').textContent = standardData.icon || '📖';
+                    document.getElementById('stdName').textContent = standardData.standardName || 'ધોરણ';
+                    document.getElementById('pageTitle').textContent = (standardData.icon || '📖') + ' ' + (standardData.standardName || 'ધોરણ');
+                    document.title = standardData.standardName + ' - Online Education Guru';
+                }
+
+                // Load subjects
+                const subRes = await apiCached('getSubjects');
+                allSubjects = subRes.success ? subRes.data : [];
+
+                // Render type grid
+                renderTypeGrid();
+
+            } catch (err) {
+                console.error('Error:', err);
+                renderTypeGrid();
+            }
+
+            hideLoader();
+        });
+
+        function renderTypeGrid() {
+            const grid = document.getElementById('typeGrid');
+            grid.innerHTML = typeConfig.map((t, i) => `
+        <div class="type-card" onclick="selectType('${t.type}', '${t.name}')" style="animation-delay:${i * 0.08}s">
+          <div class="type-icon">${t.icon}</div>
+          <div class="type-name">${t.name}</div>
+          <div class="type-desc">${t.desc}</div>
+        </div>
+      `).join('');
+        }
+
+        function selectType(type, typeName) {
+            selectedType = type;
+            document.getElementById('selectedTypeName').textContent = typeName;
+
+            // Highlight selected
+            document.querySelectorAll('.type-card').forEach(c => {
+                c.style.opacity = '0.5';
+                c.style.borderColor = '';
+            });
+            event.currentTarget.style.opacity = '1';
+            event.currentTarget.style.borderColor = 'var(--primary)';
+
+            // Show subject chips
+            const subSection = document.getElementById('subjectSection');
+            subSection.classList.remove('hidden');
+
+            const chips = document.getElementById('subjectChips');
+            chips.innerHTML = `<button class="subject-chip active" onclick="selectSubject('', this)">📋 બધા</button>` +
+                allSubjects.map(s => `
+          <button class="subject-chip" onclick="selectSubject('${s.id}', this)">
+            ${s.icon || '📚'} ${s.subjectName}
+          </button>
+        `).join('');
+
+            subSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Load all materials of this type
+            loadMaterials('', typeName);
+        }
+
+        function selectSubject(subjectId, el) {
+            selectedSubjectId = subjectId;
+            document.querySelectorAll('.subject-chip').forEach(c => c.classList.remove('active'));
+            if (el) el.classList.add('active');
+
+            const typeName = document.getElementById('selectedTypeName').textContent;
+            loadMaterials(subjectId, typeName);
+        }
+
+        async function loadMaterials(subjectId, typeName) {
+            const matSection = document.getElementById('materialsSection');
+            matSection.classList.remove('hidden');
+            document.getElementById('materialsTitle').textContent = typeName || 'મટિરિયલ્સ';
+
+            renderSkeletonStrips('materialsList', 4);
+
+            try {
+                const params = { standardId: standardId, type: selectedType };
+                if (subjectId) params.subjectId = subjectId;
+
+                const res = await api('getMaterials', params);
+
+                if (res.success && res.data.length > 0) {
+                    const container = document.getElementById('materialsList');
+                    container.innerHTML = res.data.map((item, i) => `
+            <div class="material-card" style="animation-delay:${i * 0.06}s">
+              <div class="material-icon">${getTypeIcon(selectedType)}</div>
+              <div class="material-info">
+                <div class="material-title">${item.title || 'Untitled'}</div>
+              </div>
+              <div class="material-actions">
+                ${item.driveLink ? `
+                  <a href="${item.driveLink}" target="_blank" class="btn btn-sm btn-secondary">👁️ View</a>
+                  <a href="${getDriveDownloadLink(item.driveLink)}" target="_blank" class="btn btn-sm btn-primary">⬇️</a>
+                ` : '<span class="badge badge-danger">No Link</span>'}
+              </div>
+            </div>
+          `).join('');
+                } else {
+                    document.getElementById('materialsList').innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📋</div>
+              <div class="empty-text">હાલમાં કોઈ મટિરિયલ ઉપલબ્ધ નથી</div>
+              <p style="color:var(--text-muted);font-size:var(--font-size-xs);margin-top:var(--space-sm);">
+                Admin Panel માંથી મટિરિયલ ઉમેરો
+              </p>
+            </div>
+          `;
+                }
+            } catch (err) {
+                document.getElementById('materialsList').innerHTML = `
+          <div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">લોડ કરવામાં સમસ્યા</div></div>
+        `;
+            }
+
+            matSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function getTypeIcon(type) {
+            const icons = { textbook: '📕', workbook: '📗', testpaper: '📝', solution: '✅', worksheet: '📋', other: '📂' };
+            return icons[type] || '📄';
+        }
+
+        function getDriveDownloadLink(viewLink) {
+            if (!viewLink) return '#';
+            const match = viewLink.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (match) return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+            return viewLink;
+        }
+    </script>
+</body>
+
+</html>

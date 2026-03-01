@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="gu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Admin Panel - Online Education Guru</title>
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .admin-login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+            background: var(--bg-gradient);
+        }
+
+        .admin-login-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+            padding: var(--space-2xl);
+            width: 100%;
+            max-width: 400px;
+            animation: scaleIn 0.4s ease;
+        }
+
+        .admin-login-card h1 {
+            text-align: center;
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--space-sm);
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .admin-login-card .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--space-xl);
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            margin-bottom: 4px;
+        }
+
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background: var(--primary-glow);
+            color: var(--primary-light);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: var(--space-lg);
+        }
+
+        .sidebar-logo span {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .admin-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-xl);
+            flex-wrap: wrap;
+            gap: var(--space-md);
+        }
+
+        .admin-header-bar h2 {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+        }
+
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff;
+            font-size: 1.5rem;
+            z-index: 200;
+            box-shadow: var(--shadow-lg);
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--bg-surface);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .item-row .item-name {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: var(--space-xs);
+            flex-shrink: 0;
+        }
+
+        .section-toolbar {
+            display: flex;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== LOGIN SCREEN ===== -->
+    <div id="adminLoginScreen" class="admin-login-wrapper">
+        <div class="admin-login-card">
+            <h1>🔐 Admin Panel</h1>
+            <p class="subtitle">Online Education Guru</p>
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" id="adminUser" class="form-input" placeholder="Username" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" id="adminPass" class="form-input" placeholder="Password"
+                    autocomplete="current-password">
+            </div>
+            <button class="btn btn-primary btn-full mt-md" onclick="handleAdminLogin()" id="loginBtn">Login</button>
+        </div>
+    </div>
+
+    <!-- ===== ADMIN DASHBOARD ===== -->
+    <div id="adminDashboard" class="admin-layout" style="display:none;">
+
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-logo">
+                <span>📚</span>
+                <span>Admin Panel</span>
+            </div>
+
+            <div class="sidebar-item active" data-section="dashboard" onclick="switchSection('dashboard', this)">📊
+                Dashboard</div>
+            <div class="sidebar-item" data-section="breaking-news" onclick="switchSection('breaking-news', this)">📰
+                Breaking News</div>
+            <div class="sidebar-item" data-section="nav-tabs" onclick="switchSection('nav-tabs', this)">🔗 Nav Tabs
+            </div>
+            <div class="sidebar-item" data-section="standards" onclick="switchSection('standards', this)">📖 ધોરણ</div>
+            <div class="sidebar-item" data-section="subjects" onclick="switchSection('subjects', this)">📚 વિષયો</div>
+            <div class="sidebar-item" data-section="materials" onclick="switchSection('materials', this)">📄 Materials
+            </div>
+            <div class="sidebar-item" data-section="teacher-tools" onclick="switchSection('teacher-tools', this)">🛠️
+                Teacher's Tools</div>
+            <div class="sidebar-item" data-section="office-tools" onclick="switchSection('office-tools', this)">🏢
+                Office Tools</div>
+            <div class="sidebar-item" data-section="vachan-lekhan" onclick="switchSection('vachan-lekhan', this)">📖
+                વાંચન-લેખન</div>
+            <div class="sidebar-item" data-section="ganan" onclick="switchSection('ganan', this)">🔢 ગણન</div>
+            <div class="sidebar-item" data-section="games" onclick="switchSection('games', this)">🎮 ગેમ્સ</div>
+            <div class="sidebar-item" data-section="quiz-categories" onclick="switchSection('quiz-categories', this)">❓
+                Quiz Categories</div>
+            <div class="sidebar-item" data-section="quiz-questions" onclick="switchSection('quiz-questions', this)">📝
+                Quiz Questions</div>
+            <div class="sidebar-item" data-section="quiz-results" onclick="switchSection('quiz-results', this)">📊 Quiz
+                Results</div>
+            <div class="sidebar-item" data-section="settings" onclick="switchSection('settings', this)">⚙️ Settings
+            </div>
+            <div class="sidebar-item" data-section="password" onclick="switchSection('password', this)">🔑 Change
+                Password</div>
+
+            <div
+                style="border-top:1px solid var(--border-color);margin-top:var(--space-lg);padding-top:var(--space-lg);">
+                <div class="sidebar-item" onclick="handleAdminLogout()" style="color:var(--accent-pink);">🚪 Logout
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="admin-main">
+
+            <!-- Mobile menu toggle -->
+            <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+
+            <!-- ===== Dashboard ===== -->
+            <div class="admin-section active" id="sec-dashboard">
+                <div class="admin-header-bar">
+                    <h2>📊 Dashboard</h2>
+                </div>
+                <div class="stat-grid" id="dashboardStats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statStudents">-</div>
+                        <div class="stat-label">વિદ્યાર્થીઓ</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statTeachers">-</div>
+                        <div class="stat-label">શિક્ષકો</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statQuizzes">-</div>
+                        <div class="stat-label">Quiz Results</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statMaterials">-</div>
+                        <div class="stat-label">Materials</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Breaking News ===== -->
+            <div class="admin-section" id="sec-breaking-news">
+                <div class="admin-header-bar">
+                    <h2>📰 Breaking News</h2>
+                    <button class="btn btn-primary btn-sm" onclick="openAddModal('breakingNews')">+ Add News</button>
+                </div>
+                <div id="breakingNewsList"></div>
+            </div>
+
+            <!-- ===== Nav Tabs ===== -->
+            <div class="admin-section" id="sec-nav-tabs">
+                <div class="admin-header-bar">
+                    <h2>🔗 Nav Tabs</h2>
+                    <button class="btn btn-primary btn-sm" onclick="openAddModal('navTabs')">+ Add Tab</button>
+                </div>
+                <div id="navTabsList"></div>
+            </div>
+
+            <!-- ===== Standards ===== -->
+            <div class="admin-section" id="sec-standards">
+                <div class="admin-header-bar">
+                    <h2>📖 ધોરણ</h2>
+                    <button class="btn btn-primary btn-sm" onclick="openAddModal('standards')">+ Add Standard</button>
+                </div>
+                <div id="standardsList"></div>
+            </div>
+
+            <!-- ===== Subjects ===== -->
+            <div class="admin-section" id="sec-subjects">
+                <div class="admin-header-bar">
+                    <h2>📚 વિષયો</h2>
+                    <button class="btn btn-primary btn-sm" onclick="openAddModal('subjects')">+ Add Subject</button>
+                </div>
+                <div id="subjectsList"></div>
+            </div>
+
+            <!-- ===== Materials ===== -->
+            <div class="admin-section" id="sec-materials">
+                <div class="admin-header-bar">
+                    <h2>📄 Materials</h2>
+                    <button class="btn btn-primary btn-sm" onclick="openAddModal('materials')">+ Add Material</button>
+                </div>
+                <div class="section-toolbar">
+                    <select class="form-select" id="matFilterStd" onchange="loadMaterialsAdmin()"
+                        style="max-width:200px;">
+                        <option value="">બધા ધોરણ</option>
+                    </select>
+                    <select class="form-select" id="matFilterType" onchange="loadMaterialsAdmin()"
+                        style="max-width:200px;">
+                        <option value="">બધા Type</option>
+                        <option value="textbook">પાઠ્યપુસ્તક</option>
+                        <option value="workbook">સ્વાધ્યાયપોથી</option>
+                        <option value="testpaper">ટેસ્ટ પેપર</option>
+                        <option value="solution">પેપર સોલ્યુશન</option>
+                        <option value="other">અન્ય</option>
+                    </select>
+                </div>
+                <div id="materialsList"></div>
+            </div>
+
+            <!-- ===== Teacher Tools ===== -->
+            <div class="admin-section" id="sec-teacher-tools">
+                <div class="admin-header-bar">
+                    <h2>🛠️ Teacher's Tools</h2>
+                    <button class="btn btn-primary btn-sm" onclick="openUploadModal('teacher')">+ Import Tool</button>
+                </div>
+                <div id="teacherToolsList"></div>
+            </div>
+
+            <!-- ===== Office Tools ===== -->
+            <div class="admin-section" id="sec-office-tools">
+                <div class="admin-header-bar">
+                    <h2>🏢 Office Tools</h2>
+                    <button class="btn btn-primary btn-sm" onclick="openUploadModal('office')">+ Import Tool</button>
+                </div>
+                <div id="officeToolsList"></div>
+            </div>
+
+            <!-- ===== Vachan-Lekhan ===== -->
+            <div class="admin-section" id="sec-vachan-lekhan">
+                <div class="admin-header-bar">
+                    <h2>📖 વાંચન-લેખન</h2>
+                    <button class="btn btn-primary btn-sm" onclick="openAddModal('vachanLekhan')">+ Add Item</button>
+                </div>
+                <div id="vachanLekhanList"></div>
+            </div>
+
+            <!-- ===== Ganan ===== -->
+            <div class="admin-section" id="sec-ganan">
+                <div class="admin-header-bar">
+                    <h2>🔢 ગણન</h2>
+                    <button class="btn btn-primary btn-sm" onclick="openAddModal('ganan')">+ Add Item</button>
+                </div>
+                <div id="gananList"></div>
+            </div>
+
+            <!-- ===== Games ===== -->
+            <div class="admin-section" id="sec-games">
+                <div class="admin-header-bar">
+                    <h2>🎮 ગેમ્સ</h2>
+                    <button class="btn btn-primary btn-sm" onclick="openUploadModal('games')">+ Import Game</button>
+                </div>
+                <div id="gamesList"></div>
+            </div>
+
+            <!-- ===== Quiz Categories ===== -->
+            <div class="admin-section" id="sec-quiz-categories">
+                <div class="admin-header-bar">
+                    <h2>❓ Quiz Categories</h2>
+                    <button class="btn btn-primary btn-sm" onclick="openAddModal('quizCategories')">+ Add
+                        Category</button>
+                </div>
+                <div id="quizCategoriesList"></div>
+            </div>
+
+            <!-- ===== Quiz Questions ===== -->
+            <div class="admin-section" id="sec-quiz-questions">
+                <div class="admin-header-bar">
+                    <h2>📝 Quiz Questions</h2>
+                    <button class="btn btn-primary btn-sm" onclick="openAddModal('quizQuestions')">+ Add
+                        Question</button>
+                </div>
+                <div id="quizQuestionsList"></div>
+            </div>
+
+            <!-- ===== Quiz Results ===== -->
+            <div class="admin-section" id="sec-quiz-results">
+                <div class="admin-header-bar">
+                    <h2>📊 Quiz Results</h2>
+                </div>
+                <div style="overflow-x:auto">
+                    <table class="admin-table" id="quizResultsTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Mobile</th>
+                                <th>Category</th>
+                                <th>Score</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quizResultsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== Settings ===== -->
+            <div class="admin-section" id="sec-settings">
+                <div class="admin-header-bar">
+                    <h2>⚙️ Site Settings</h2>
+                </div>
+                <div style="max-width:600px;">
+                    <div class="form-group">
+                        <label class="form-label">Site Name</label>
+                        <input type="text" class="form-input" id="setSiteName" placeholder="Online Education Guru">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Logo Upload</label>
+                        <input type="file" class="form-input" id="setLogo" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Favicon Upload</label>
+                        <input type="file" class="form-input" id="setFavicon" accept="image/*,.ico">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Email</label>
+                        <input type="email" class="form-input" id="setEmail" placeholder="email@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Phone</label>
+                        <input type="text" class="form-input" id="setPhone" placeholder="+91 XXXXXXXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Footer Text</label>
+                        <input type="text" class="form-input" id="setFooter" placeholder="© 2026 Online Education Guru">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">About Text</label>
+                        <textarea class="form-input" id="setAbout" rows="4" placeholder="About us text..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Address</label>
+                        <textarea class="form-input" id="setAddress" rows="2" placeholder="Address..."></textarea>
+                    </div>
+                    <button class="btn btn-primary mt-md" onclick="saveSettings()">💾 Save Settings</button>
+                </div>
+            </div>
+
+            <!-- ===== Change Password ===== -->
+            <div class="admin-section" id="sec-password">
+                <div class="admin-header-bar">
+                    <h2>🔑 Change Password</h2>
+                </div>
+                <div style="max-width:400px;">
+                    <div class="form-group">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" class="form-input" id="oldPass">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" class="form-input" id="newPass">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-input" id="confirmPass">
+                    </div>
+                    <button class="btn btn-primary mt-md" onclick="changePassword()">🔑 Change Password</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== GENERIC MODAL ===== -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Add Item</div>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter">
+                <button class="btn btn-secondary btn-sm" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary btn-sm" id="modalSaveBtn" onclick="modalSave()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/admin.js"></script>
+
+</body>
+
+</html>
