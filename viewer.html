@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="gu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#6c63ff">
+    <title>Loading... - Online Education Guru</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .viewer-wrapper {
+            min-height: 60vh;
+            position: relative;
+        }
+
+        .viewer-frame-container {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            background: #ffffff;
+            position: relative;
+        }
+
+        .viewer-frame {
+            width: 100%;
+            border: none;
+            display: block;
+            background: #fff;
+            min-height: 300px;
+        }
+
+        .viewer-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            padding: var(--space-2xl) 0;
+            background: var(--bg-primary);
+        }
+
+        .viewer-loading .spinner {
+            width: 40px;
+            height: 40px;
+        }
+
+        .viewer-loading-text {
+            margin-top: var(--space-md);
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+        }
+
+        .viewer-error {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            padding: var(--space-2xl);
+            text-align: center;
+        }
+
+        .viewer-error-icon {
+            font-size: 3rem;
+            margin-bottom: var(--space-md);
+        }
+
+        .viewer-error-msg {
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+            max-width: 300px;
+            line-height: 1.8;
+            margin-bottom: var(--space-lg);
+        }
+    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1217460377621795"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="site-header" id="site-header"></header>
+    <div class="news-ticker" id="news-ticker"></div>
+
+    <main class="page-wrapper">
+        <div class="container">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <button class="back-btn" onclick="goBack()">←</button>
+                <h1 class="page-title" id="pageTitle">📄 ફાઈલ વ્યૂઅર</h1>
+            </div>
+
+            <!-- Ad Top -->
+            <div class="ad-container" data-ad-slot="9999999901" data-ad-format="auto"></div>
+
+            <!-- Viewer Content -->
+            <div class="viewer-frame-container" id="frameContainer">
+                <div class="viewer-loading" id="viewerLoading">
+                    <div class="spinner"></div>
+                    <div class="viewer-loading-text">📄 ફાઈલ લોડ થઈ રહી છે...</div>
+                </div>
+
+                <!-- Error State -->
+                <div class="viewer-error" id="viewerError" style="display:none;">
+                    <div class="viewer-error-icon">❌</div>
+                    <div class="viewer-error-msg" id="errorMsg">ફાઈલ લોડ થઈ શકી નથી</div>
+                    <button class="btn btn-primary" onclick="goBack()">← પાછા જાઓ</button>
+                </div>
+
+                <!-- Content Frame -->
+                <iframe id="viewerFrame" class="viewer-frame" style="display:none;"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                    referrerpolicy="no-referrer"></iframe>
+            </div>
+
+            <!-- Ad Between -->
+            <div class="ad-container" data-ad-slot="9999999902" data-ad-format="auto"
+                style="margin-top:var(--space-lg);"></div>
+
+            <!-- Related Info -->
+            <div
+                style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:var(--space-lg); margin-top:var(--space-lg); text-align:center;">
+                <p style="color:var(--text-secondary); font-size:var(--font-size-sm);">
+                    💡 <strong>Online Education Guru</strong> — ગુજરાત શિક્ષણ માટેનું સંપૂર્ણ ઓનલાઈન પ્લેટફોર્મ
+                </p>
+                <div
+                    style="display:flex; gap:var(--space-sm); justify-content:center; flex-wrap:wrap; margin-top:var(--space-md);">
+                    <a href="teacher-tools.html" class="btn btn-sm btn-secondary">🛠️ Teacher Tools</a>
+                    <a href="office-tools.html" class="btn btn-sm btn-secondary">🏢 Office Tools</a>
+                    <a href="games.html" class="btn btn-sm btn-secondary">🎮 Games</a>
+                    <a href="quiz.html" class="btn btn-sm btn-secondary">❓ Quiz</a>
+                </div>
+            </div>
+
+            <!-- Ad Bottom -->
+            <div class="ad-container ad-container-rect" data-ad-slot="9999999903" data-ad-format="auto"
+                style="margin-top:var(--space-lg);"></div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer" id="site-footer"></footer>
+
+    <script src="js/common.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const fileId = params.get('fileId');
+        const fileUrl = params.get('url');
+        const fileName = params.get('name') || 'File Viewer';
+        let source = params.get('source') || '';
+
+        // If page has URL params (normal navigation), save source to sessionStorage
+        if (fileId || fileUrl) {
+            sessionStorage.setItem('oeg_viewer_source', source);
+        }
+
+        // If page was refreshed (params lost due to replaceState), auto-redirect back
+        if (!fileId && !fileUrl) {
+            const savedSource = sessionStorage.getItem('oeg_viewer_source') || '';
+            sessionStorage.removeItem('oeg_viewer_source');
+            if (savedSource === 'teacher') window.location.replace('teacher-tools.html');
+            else if (savedSource === 'office') window.location.replace('office-tools.html');
+            else if (savedSource === 'games') window.location.replace('games.html');
+            else window.location.replace('index.html');
+        }
+
+        // Hide URL params from address bar to prevent copying
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        // Set page title
+        const decodedName = decodeURIComponent(fileName);
+        document.getElementById('pageTitle').innerHTML = getSourceIcon() + ' ' + decodedName;
+        document.title = decodedName + ' - Online Education Guru';
+
+        function getSourceIcon() {
+            if (source === 'teacher') return '🛠️';
+            if (source === 'office') return '🏢';
+            if (source === 'games') return '🎮';
+            return '📄';
+        }
+
+        function goBack() {
+            if (source === 'teacher') window.location.replace('teacher-tools.html');
+            else if (source === 'office') window.location.replace('office-tools.html');
+            else if (source === 'games') window.location.replace('games.html');
+            else window.location.replace('index.html');
+        }
+
+        // Extract Google Drive file ID from various URL formats
+        function extractDriveId(url) {
+            if (!url) return null;
+            let match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (match) return match[1];
+            match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            if (match) return match[1];
+            match = url.match(/\/open\?id=([a-zA-Z0-9_-]+)/);
+            if (match) return match[1];
+            match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (match) return match[1];
+            return null;
+        }
+
+        async function loadFile() {
+            const loadingEl = document.getElementById('viewerLoading');
+            const errorEl = document.getElementById('viewerError');
+            const frameEl = document.getElementById('viewerFrame');
+
+            let targetFileId = fileId;
+
+            if (!targetFileId && fileUrl) {
+                targetFileId = extractDriveId(fileUrl);
+            }
+
+            if (!targetFileId) {
+                showError('ફાઈલ ID મળી નથી. URL format ચેક કરો.');
+                return;
+            }
+
+            try {
+                const res = await api('getFileContent', { fileId: targetFileId });
+
+                if (res.success && res.content) {
+                    document.getElementById('pageTitle').innerHTML = getSourceIcon() + ' ' + decodedName;
+                    frameEl.srcdoc = res.content;
+                    frameEl.style.display = 'block';
+                    loadingEl.style.display = 'none';
+
+                    // Auto-resize iframe to match content height — no scroll
+                    frameEl.onload = function () {
+                        try {
+                            const h = frameEl.contentDocument.body.scrollHeight;
+                            if (h > 100) {
+                                frameEl.style.height = h + 'px';
+                            }
+                        } catch (e) { }
+                    };
+                    return;
+                } else {
+                    showError(res.error || 'ફાઈલ લોડ થઈ શકી નથી');
+                    return;
+                }
+            } catch (err) {
+                showError('સર્વર સાથે કનેક્શન થયું નથી. ફરી પ્રયાસ કરો.');
+                return;
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('viewerLoading').style.display = 'none';
+            document.getElementById('viewerError').style.display = 'flex';
+            document.getElementById('errorMsg').textContent = msg;
+        }
+
+        // Load after page init
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(loadFile, 500);
+        });
+    </script>
+</body>
+
+</html>

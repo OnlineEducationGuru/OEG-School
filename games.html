@@ -167,7 +167,7 @@
         <div class="container">
 
             <div class="page-header">
-                <button class="back-btn" onclick="history.back()">←</button>
+                <button class="back-btn" onclick="window.location.href='index.html'">←</button>
                 <h1 class="page-title">🎮 ઈન્ટર એક્ટીવ ગેમ્સ</h1>
             </div>
 
@@ -244,7 +244,7 @@
                 return;
             }
             grid.innerHTML = games.map((g, i) => `
-        <a href="${g.fileUrl || '#'}" target="_blank" class="game-card" style="animation-delay:${i * 0.06}s">
+        <a href="${g.fileUrl ? 'viewer.html?url=' + encodeURIComponent(g.fileUrl) + '&name=' + encodeURIComponent(g.name) + '&source=games' : '#'}" class="game-card" style="animation-delay:${i * 0.06}s">
           <div class="game-icon">${g.icon || '🎮'}</div>
           <div class="game-name">${g.name || ''}</div>
           <div class="game-subject">${g.subject || ''}</div>

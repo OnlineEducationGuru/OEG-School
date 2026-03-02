@@ -36,7 +36,7 @@
 
             <!-- Page Header -->
             <div class="page-header">
-                <button class="back-btn" onclick="history.back()">←</button>
+                <button class="back-btn" onclick="window.location.href='index.html'">←</button>
                 <h1 class="page-title">🏢 Office Tools</h1>
             </div>
 
@@ -73,9 +73,8 @@
                         id: item.id,
                         name: item.name,
                         icon: item.icon || '🏢',
-                        link: item.fileUrl || '#',
-                        subtitle: item.fileName || ''
-                    })), 'officeToolsList', { target: '_blank' });
+                        link: item.fileUrl ? 'viewer.html?url=' + encodeURIComponent(item.fileUrl) + '&name=' + encodeURIComponent(item.name) + '&source=office' : '#'
+                    })), 'officeToolsList');
                 } else {
                     renderDefaultOfficeTools();
                 }

@@ -4,11 +4,15 @@
 
 // ---- CONFIGURATION ----
 // Replace this URL after deploying code.gs as a Web App
-const API_BASE = 'https://script.google.com/macros/s/AKfycbx3hrOtIB33IoEVaz9qzy7CSvhdM6RIC0hCm9kGo5f0eoU_ACMwE7FtiIJ2EbnQpGzB/exec';
+const API_BASE = 'https://script.google.com/macros/s/AKfycbyD-4x6E5xa15z6kZY6-YYj_dLl0OB3axaNNxBKymCZ10ndH17Uon-U7RSit_coeVmu/exec';
 
 // ---- CACHE ----
 const APP_CACHE = {};
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// ---- PERSISTENT CACHE (localStorage) ----
+const LS_CACHE_PREFIX = 'oeg_cache_';
+const LS_CACHE_TTL = 15 * 60 * 1000; // 15 minutes persistent cache
 
 // ============================================================
 // API HELPER
@@ -33,12 +37,37 @@ async function api(action, params = {}) {
 
 async function apiCached(action, params = {}, forceRefresh = false) {
   const cacheKey = action + JSON.stringify(params);
+
+  // Check memory cache first
   if (!forceRefresh && APP_CACHE[cacheKey] && Date.now() - APP_CACHE[cacheKey].time < CACHE_TTL) {
     return APP_CACHE[cacheKey].data;
   }
+
+  // Check localStorage persistent cache
+  if (!forceRefresh) {
+    try {
+      const lsData = localStorage.getItem(LS_CACHE_PREFIX + cacheKey);
+      if (lsData) {
+        const parsed = JSON.parse(lsData);
+        if (Date.now() - parsed.time < LS_CACHE_TTL) {
+          APP_CACHE[cacheKey] = { data: parsed.data, time: parsed.time };
+          // Background refresh — don't await
+          api(action, params).then(r => {
+            if (r.success) {
+              APP_CACHE[cacheKey] = { data: r, time: Date.now() };
+              try { localStorage.setItem(LS_CACHE_PREFIX + cacheKey, JSON.stringify({ data: r, time: Date.now() })); } catch (e) { }
+            }
+          }).catch(() => { });
+          return parsed.data;
+        }
+      }
+    } catch (e) { }
+  }
+
   const result = await api(action, params);
   if (result.success) {
     APP_CACHE[cacheKey] = { data: result, time: Date.now() };
+    try { localStorage.setItem(LS_CACHE_PREFIX + cacheKey, JSON.stringify({ data: result, time: Date.now() })); } catch (e) { }
   }
   return result;
 }
@@ -121,7 +150,7 @@ async function loadHeader(activePage = '') {
         `}
       </div>
     </div>
-    <nav class="header-nav container" id="headerNav">
+    <nav class="header-nav container">
       ${tabs.map(tab => `
         <a href="${tab.link}" class="nav-tab ${activePage === tab.link ? 'active' : ''}">
           <span class="icon">${tab.icon || ''}</span>
@@ -149,7 +178,8 @@ function getDefaultNavTabs() {
     { label: 'ધોરણ', link: 'index.html#standards', icon: '📖' },
     { label: 'વિષયો', link: 'subjects.html', icon: '📚' },
     { label: 'ક્વિઝ', link: 'quiz.html', icon: '❓' },
-    { label: 'ટૂલ્સ', link: 'teacher-tools.html', icon: '🛠️' },
+    { label: 'Teacher Tools', link: 'teacher-tools.html', icon: '🛠️' },
+    { label: 'Office Tools', link: 'office-tools.html', icon: '🏢' },
     { label: 'ગેમ્સ', link: 'games.html', icon: '🎮' }
   ];
 }
@@ -179,8 +209,11 @@ async function loadBreakingNews() {
   ).join('');
 
   tickerEl.innerHTML = `
-    <div class="news-ticker-inner">
-      ${itemsHtml}${itemsHtml}
+    <div class="news-ticker-label">Breaking News ⚡</div>
+    <div class="news-ticker-content">
+      <div class="news-ticker-inner">
+        ${itemsHtml}${itemsHtml}
+      </div>
     </div>
   `;
 }
@@ -288,9 +321,14 @@ function renderStripList(items, containerId, options = {}) {
   }
 
   container.innerHTML = items.map((item, i) => {
-    const href = item.link || item.fileUrl || options.linkPrefix
-      ? `${options.linkPrefix || ''}?id=${item.id}`
-      : '#';
+    let href = '#';
+    if (item.link) {
+      href = item.link;
+    } else if (item.fileUrl) {
+      href = item.fileUrl;
+    } else if (options.linkPrefix) {
+      href = `${options.linkPrefix}?id=${item.id}`;
+    }
     return `
       <a href="${href}" class="strip-item" ${options.target ? `target="${options.target}"` : ''} data-id="${item.id || ''}">
         <div class="strip-icon">${item.icon || '📄'}</div>
@@ -406,34 +444,83 @@ function hideLoader() {
 }
 
 // ============================================================
-// RIGHT-CLICK & COPY PROTECTION
+// RIGHT-CLICK, COPY, SCREENSHOT & PRINT PROTECTION
 // ============================================================
 
 function disableRightClick() {
   document.body.classList.add('protected');
 
+  // Disable right-click context menu
   document.addEventListener('contextmenu', function (e) {
     e.preventDefault();
     showToast('Right click disabled', 'info');
     return false;
   });
 
+  // Disable keyboard shortcuts
   document.addEventListener('keydown', function (e) {
-    // Disable F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S, Ctrl+C (on protected text)
+    // Disable F12 (DevTools)
     if (e.key === 'F12') { e.preventDefault(); return false; }
+    // Disable Ctrl+Shift+I (DevTools)
     if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) { e.preventDefault(); return false; }
+    // Disable Ctrl+Shift+J (Console)
+    if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
+    // Disable Ctrl+Shift+C (Element picker)
+    if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) { e.preventDefault(); return false; }
+    // Disable Ctrl+U (View source)
     if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
+    // Disable Ctrl+S (Save page)
     if (e.ctrlKey && (e.key === 'S' || e.key === 's')) { e.preventDefault(); return false; }
+    // Disable Ctrl+C (Copy)
+    if (e.ctrlKey && (e.key === 'C' || e.key === 'c') && !e.shiftKey) { e.preventDefault(); return false; }
+    // Disable Ctrl+A (Select all)
+    if (e.ctrlKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); return false; }
+    // Disable Ctrl+P (Print)
+    if (e.ctrlKey && (e.key === 'P' || e.key === 'p')) { e.preventDefault(); return false; }
+    // Disable PrintScreen
+    if (e.key === 'PrintScreen') { e.preventDefault(); return false; }
   });
 
+  // Block copy event
   document.addEventListener('copy', function (e) {
     e.preventDefault();
+    showToast('કોપી કરવાની મંજૂરી નથી', 'info');
     return false;
   });
 
+  // Block cut event
   document.addEventListener('cut', function (e) {
     e.preventDefault();
     return false;
+  });
+
+  // Block drag (prevents drag-to-copy images/text)
+  document.addEventListener('dragstart', function (e) {
+    e.preventDefault();
+    return false;
+  });
+
+  // Block select all via selectstart
+  document.addEventListener('selectstart', function (e) {
+    e.preventDefault();
+    return false;
+  });
+
+  // Blur page on PrintScreen / screenshot attempt
+  document.addEventListener('keyup', function (e) {
+    if (e.key === 'PrintScreen') {
+      navigator.clipboard.writeText('').catch(() => { });
+      showToast('Screenshot disabled', 'info');
+    }
+  });
+
+  // Hide content when tab loses focus (anti-screenshot for some tools)
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') {
+      document.body.style.filter = 'blur(30px)';
+    } else {
+      document.body.style.filter = 'none';
+    }
   });
 }
 
@@ -541,10 +628,12 @@ document.addEventListener('DOMContentLoaded', function () {
   // Disable right-click on all pages
   disableRightClick();
 
-  // Load header & footer if elements exist
-  loadHeader();
-  loadFooter();
-  loadBreakingNews();
+  // Load header, footer & news in parallel for speed
+  Promise.all([
+    loadHeader(),
+    loadFooter(),
+    loadBreakingNews()
+  ]).catch(() => { });
 
   // Init ad slots
   setTimeout(initAdSlots, 1000);
