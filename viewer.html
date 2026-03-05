@@ -75,6 +75,62 @@
             line-height: 1.8;
             margin-bottom: var(--space-lg);
         }
+
+        .viewer-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-md);
+            flex-wrap: wrap;
+        }
+
+        .toolbar-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--primary-glow);
+            border-color: var(--primary);
+            color: var(--primary-light);
+        }
+
+        .toolbar-btn:active {
+            transform: scale(0.96);
+        }
+
+        .viewer-frame-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 999;
+            border-radius: 0;
+            border: none;
+            margin: 0;
+        }
+
+        .viewer-frame-container.fullscreen .viewer-frame {
+            height: 100vh !important;
+            min-height: 100vh;
+        }
     </style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1217460377621795"
         crossorigin="anonymous"></script>
@@ -98,6 +154,14 @@
             <!-- Ad Top -->
             <div class="ad-container" data-ad-slot="9999999901" data-ad-format="auto"></div>
 
+            <!-- Viewer Toolbar -->
+            <div class="viewer-toolbar" id="viewerToolbar" style="display:none;">
+                <button class="toolbar-btn" onclick="printFile()" title="Print">🖨️ Print</button>
+                <button class="toolbar-btn" onclick="resetFile()" title="Reset">🔄 Reset</button>
+                <button class="toolbar-btn" onclick="toggleFullscreen()" title="Fullscreen">🖥️ Fullscreen</button>
+                <button class="toolbar-btn" onclick="goBack()" title="Back">← પાછા જાઓ</button>
+            </div>
+
             <!-- Viewer Content -->
             <div class="viewer-frame-container" id="frameContainer">
                 <div class="viewer-loading" id="viewerLoading">
@@ -114,7 +178,7 @@
 
                 <!-- Content Frame -->
                 <iframe id="viewerFrame" class="viewer-frame" style="display:none;"
-                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
                     referrerpolicy="no-referrer"></iframe>
             </div>
 
@@ -242,6 +306,9 @@
                             }
                         } catch (e) { }
                     };
+
+                    // Show toolbar
+                    document.getElementById('viewerToolbar').style.display = 'flex';
                     return;
                 } else {
                     showError(res.error || 'ફાઈલ લોડ થઈ શકી નથી');
@@ -262,6 +329,52 @@
         // Load after page init
         document.addEventListener('DOMContentLoaded', function () {
             setTimeout(loadFile, 500);
+        });
+
+        // ===== TOOLBAR FUNCTIONS =====
+
+        function printFile() {
+            try {
+                const frame = document.getElementById('viewerFrame');
+                if (frame && frame.contentWindow) {
+                    frame.contentWindow.print();
+                }
+            } catch (e) {
+                showToast('Print કરી શકાયું નથી', 'error');
+            }
+        }
+
+        function resetFile() {
+            showLoader('ફાઈલ ફરી લોડ થઈ રહી છે...');
+            const frame = document.getElementById('viewerFrame');
+            frame.style.display = 'none';
+            document.getElementById('viewerLoading').style.display = 'flex';
+            document.getElementById('viewerToolbar').style.display = 'none';
+            setTimeout(() => {
+                loadFile();
+                hideLoader();
+            }, 500);
+        }
+
+        function toggleFullscreen() {
+            const container = document.getElementById('frameContainer');
+            container.classList.toggle('fullscreen');
+            if (container.classList.contains('fullscreen')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Escape key exits fullscreen
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                const container = document.getElementById('frameContainer');
+                if (container.classList.contains('fullscreen')) {
+                    container.classList.remove('fullscreen');
+                    document.body.style.overflow = '';
+                }
+            }
         });
     </script>
 </body>

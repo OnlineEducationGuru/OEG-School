@@ -373,8 +373,12 @@
             <div class="admin-section" id="sec-quiz-questions">
                 <div class="admin-header-bar">
                     <h2>📝 Quiz Questions</h2>
-                    <button class="btn btn-primary btn-sm" onclick="openAddModal('quizQuestions')">+ Add
-                        Question</button>
+                    <div style="display:flex;gap:var(--space-sm);flex-wrap:wrap;">
+                        <button class="btn btn-secondary btn-sm" onclick="openExcelUploadModal()">📁 Excel
+                            Upload</button>
+                        <button class="btn btn-primary btn-sm" onclick="openAddModal('quizQuestions')">+ Add
+                            Question</button>
+                    </div>
                 </div>
                 <div id="quizQuestionsList"></div>
             </div>
@@ -439,6 +443,42 @@
                         <label class="form-label">Address</label>
                         <textarea class="form-input" id="setAddress" rows="2" placeholder="Address..."></textarea>
                     </div>
+
+                    <div
+                        style="border-top:1px solid var(--border-color);margin:var(--space-lg) 0;padding-top:var(--space-lg);">
+                        <h3 style="font-size:var(--font-size-lg);margin-bottom:var(--space-md);">📱 Social Media Links
+                        </h3>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Facebook URL</label>
+                        <input type="url" class="form-input" id="setSocialFacebook"
+                            placeholder="https://facebook.com/yourpage">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">YouTube URL</label>
+                        <input type="url" class="form-input" id="setSocialYoutube"
+                            placeholder="https://youtube.com/@yourchannel">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Instagram URL</label>
+                        <input type="url" class="form-input" id="setSocialInstagram"
+                            placeholder="https://instagram.com/yourprofile">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Twitter / X URL</label>
+                        <input type="url" class="form-input" id="setSocialTwitter"
+                            placeholder="https://twitter.com/yourhandle">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Telegram URL</label>
+                        <input type="url" class="form-input" id="setSocialTelegram"
+                            placeholder="https://t.me/yourchannel">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">WhatsApp URL / Number</label>
+                        <input type="text" class="form-input" id="setSocialWhatsapp"
+                            placeholder="https://wa.me/919876543210">
+                    </div>
                     <button class="btn btn-primary mt-md" onclick="saveSettings()">💾 Save Settings</button>
                 </div>
             </div>
@@ -484,6 +524,7 @@
     </div>
 
     <script src="js/common.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="js/admin.js"></script>
 
 </body>

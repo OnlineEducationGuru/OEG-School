@@ -121,17 +121,72 @@ function renderItemList(items, containerId, displayField, options = {}) {
         return;
     }
 
-    container.innerHTML = items.map(item => `
-    <div class="item-row" data-id="${item.id}">
+    container.innerHTML = items.map(item => {
+        const isActive = item.active === undefined || (String(item.active).toLowerCase() !== 'false');
+        const toggleBtn = (item.active !== undefined || options.sheetName)
+            ? `<button class="btn btn-sm ${isActive ? 'btn-success' : 'btn-secondary'}" style="min-width:80px;font-size:12px;" onclick="toggleItemActive('${item.id}', '${options.sheetName || ''}', '${containerId}')">${isActive ? '✅ Active' : '❌ Deactive'}</button>`
+            : '';
+        return `
+    <div class="item-row" data-id="${item.id}" style="${!isActive ? 'opacity:0.55;' : ''}">
       <span style="font-size:1.3rem;">${item.icon || '📄'}</span>
       <span class="item-name">${item[displayField] || item.name || item.title || item.text || ''}</span>
-      ${item.active !== undefined ? `<span class="badge ${item.active === 'false' || item.active === false ? 'badge-danger' : 'badge-success'}">${item.active === 'false' || item.active === false ? 'Hidden' : 'Active'}</span>` : ''}
       <div class="item-actions">
+        ${toggleBtn}
         ${options.onEdit ? `<button class="btn btn-sm btn-secondary" onclick="${options.onEdit}('${item.id}')">✏️</button>` : ''}
         ${options.onDelete ? `<button class="btn btn-sm btn-danger" onclick="${options.onDelete}('${item.id}')">🗑️</button>` : ''}
       </div>
     </div>
-  `).join('');
+  `;
+    }).join('');
+}
+
+// Sheet name map for toggle
+const sheetNameForContainer = {
+    breakingNewsList: 'BreakingNews',
+    navTabsList: 'NavTabs',
+    standardsList: 'Standards',
+    subjectsList: 'Subjects',
+    materialsList: 'Materials',
+    teacherToolsList: 'TeacherTools',
+    officeToolsList: 'OfficeTools',
+    vachanLekhanList: 'VachanLekhan',
+    gananList: 'Ganan',
+    gamesList: 'Games',
+    quizCategoriesList: 'QuizCategories',
+    quizQuestionsList: 'QuizQuestions'
+};
+
+// Reload function map
+const reloadForContainer = {
+    breakingNewsList: () => loadBreakingNews_admin(),
+    navTabsList: () => loadNavTabs(),
+    standardsList: () => loadStandards(),
+    subjectsList: () => loadSubjects(),
+    materialsList: () => loadMaterialsAdmin(),
+    teacherToolsList: () => loadTeacherTools(),
+    officeToolsList: () => loadOfficeTools(),
+    vachanLekhanList: () => loadVachanLekhan(),
+    gananList: () => loadGanan(),
+    gamesList: () => loadGames(),
+    quizCategoriesList: () => loadQuizCategories(),
+    quizQuestionsList: () => loadQuizQuestions()
+};
+
+async function toggleItemActive(id, sheetName, containerId) {
+    const sheet = sheetName || sheetNameForContainer[containerId] || '';
+    if (!sheet) { showToast('Sheet not found', 'error'); return; }
+
+    showLoader('Updating...');
+    const res = await api('toggleActive', { sheetName: sheet, id });
+    hideLoader();
+
+    if (res.success) {
+        showToast(res.active === 'true' ? '🟢 Activated' : '🔴 Deactivated', 'success');
+        // Reload the section
+        if (reloadForContainer[containerId]) reloadForContainer[containerId]();
+    } else {
+        showToast(res.error || 'Error', 'error');
+    }
 }
 
 // ============================================================
@@ -216,13 +271,18 @@ function openAddModal(type) {
         <div class="form-group"><label class="form-label">Standard</label><select class="form-select" id="mStandardId"></select></div>
         <div class="form-group"><label class="form-label">Subject</label><select class="form-select" id="mSubjectId"></select></div>
         <div class="form-group"><label class="form-label">Type</label>
-          <select class="form-select" id="mType">
+          <select class="form-select" id="mType" onchange="toggleCustomType()">
             <option value="textbook">પાઠ્યપુસ્તક</option>
             <option value="workbook">સ્વાધ્યાયપોથી</option>
             <option value="testpaper">ટેસ્ટ પેપર</option>
             <option value="solution">પેપર સોલ્યુશન</option>
             <option value="other">અન્ય</option>
+            <option value="__custom__">➕ નવો Type ઉમેરો...</option>
           </select>
+        </div>
+        <div class="form-group" id="customTypeGroup" style="display:none;">
+          <label class="form-label">Custom Type Name</label>
+          <input class="form-input" id="mCustomType" placeholder="e.g. નોટ્સ, પ્રેક્ટિસ પેપર...">
         </div>
         <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="mTitle" placeholder="Material title"></div>
         <div class="form-group"><label class="form-label">Google Drive Link</label><input class="form-input" id="mDriveLink" placeholder="https://drive.google.com/..."></div>
@@ -358,10 +418,15 @@ async function saveSubject() {
 }
 
 async function saveMaterial() {
+    let typeVal = document.getElementById('mType').value;
+    if (typeVal === '__custom__') {
+        typeVal = document.getElementById('mCustomType').value.trim();
+        if (!typeVal) { showToast('Custom Type name ભરો', 'error'); return; }
+    }
     const data = {
         standardId: document.getElementById('mStandardId').value,
         subjectId: document.getElementById('mSubjectId').value,
-        type: document.getElementById('mType').value,
+        type: typeVal,
         title: document.getElementById('mTitle').value,
         driveLink: document.getElementById('mDriveLink').value,
         order: document.getElementById('mOrder').value
@@ -371,6 +436,11 @@ async function saveMaterial() {
     const res = await api(action, data);
     if (res.success) { showToast('Saved!', 'success'); closeModal(); loadMaterialsAdmin(); }
     else showToast(res.error, 'error');
+}
+
+function toggleCustomType() {
+    const sel = document.getElementById('mType').value;
+    document.getElementById('customTypeGroup').style.display = sel === '__custom__' ? 'block' : 'none';
 }
 
 async function saveVachanLekhan() {
@@ -439,19 +509,121 @@ async function saveQuizQuestion() {
 }
 
 // ============================================================
+// EXCEL BULK UPLOAD FOR QUIZ QUESTIONS
+// ============================================================
+
+function openExcelUploadModal() {
+    const body = `
+    <div style="margin-bottom:var(--space-md);padding:var(--space-md);background:rgba(108,99,255,0.08);border-radius:var(--radius-md);font-size:var(--font-size-sm);">
+      <strong>📋 Excel Format:</strong><br>
+      Excel ની પ્રથમ row header હોવી જોઈએ:<br>
+      <code>categoryId | stdId | subjectId | chapter | question | optA | optB | optC | optD | answer</code><br>
+      <span style="color:var(--text-muted);">answer = A, B, C, or D</span>
+    </div>
+    <div class="form-group">
+      <label class="form-label">📁 Excel File (.xlsx, .xls, .csv)</label>
+      <input type="file" class="form-input" id="excelFileInput" accept=".xlsx,.xls,.csv">
+    </div>
+    <div id="excelPreview" style="display:none;margin-top:var(--space-md);">
+      <div style="font-weight:600;margin-bottom:var(--space-sm);">Preview:</div>
+      <div id="excelPreviewContent" style="max-height:200px;overflow-y:auto;font-size:var(--font-size-xs);"></div>
+    </div>
+  `;
+    openModal('📁 Excel થી Questions Upload', body, submitExcelQuestions);
+
+    // Listen for file selection
+    setTimeout(() => {
+        document.getElementById('excelFileInput').addEventListener('change', previewExcelFile);
+    }, 100);
+}
+
+let parsedExcelQuestions = [];
+
+function previewExcelFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (evt) {
+        try {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet);
+
+            if (json.length === 0) {
+                showToast('Excel ખાલી છે', 'error');
+                return;
+            }
+
+            parsedExcelQuestions = json;
+
+            // Show preview
+            const previewEl = document.getElementById('excelPreview');
+            previewEl.style.display = 'block';
+            document.getElementById('excelPreviewContent').innerHTML = `
+              <div style="color:var(--accent-green);font-weight:600;margin-bottom:var(--space-xs);">✅ ${json.length} questions found</div>
+              <table style="width:100%;border-collapse:collapse;font-size:var(--font-size-xs);">
+                <tr style="background:var(--bg-surface);">
+                  <th style="padding:4px 8px;text-align:left;">Question</th>
+                  <th style="padding:4px 8px;">Answer</th>
+                </tr>
+                ${json.slice(0, 5).map(q => `
+                  <tr style="border-bottom:1px solid var(--border-color);">
+                    <td style="padding:4px 8px;">${(q.question || '').substring(0, 50)}...</td>
+                    <td style="padding:4px 8px;text-align:center;">${q.answer || '-'}</td>
+                  </tr>
+                `).join('')}
+                ${json.length > 5 ? `<tr><td colspan="2" style="padding:4px 8px;color:var(--text-muted);">...and ${json.length - 5} more</td></tr>` : ''}
+              </table>
+            `;
+        } catch (err) {
+            showToast('Excel parse error: ' + err.message, 'error');
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+async function submitExcelQuestions() {
+    if (!parsedExcelQuestions || parsedExcelQuestions.length === 0) {
+        showToast('Excel file select કરો', 'error');
+        return;
+    }
+
+    showLoader(parsedExcelQuestions.length + ' questions upload થઈ રહ્યા છે...');
+    closeModal();
+
+    try {
+        const res = await api('bulkAddQuizQuestions', { questions: parsedExcelQuestions });
+        if (res.success) {
+            showToast(res.message || 'Uploaded!', 'success');
+            parsedExcelQuestions = [];
+            loadQuizQuestions();
+        } else {
+            showToast(res.error || 'Upload failed', 'error');
+        }
+    } catch (err) {
+        showToast('Upload error: ' + err.message, 'error');
+    }
+
+    hideLoader();
+}
+
+// ============================================================
 // LOAD FUNCTIONS
 // ============================================================
 
 async function loadBreakingNews_admin() {
-    const res = await api('getBreakingNews');
+    const res = await api('getSheetData', { sheetName: 'BreakingNews', includeAll: 'true' });
     renderItemList(res.success ? res.data : [], 'breakingNewsList', 'text', {
         onEdit: 'editBreakingNews',
-        onDelete: 'deleteBreakingNewsItem'
+        onDelete: 'deleteBreakingNewsItem',
+        sheetName: 'BreakingNews'
     });
 }
 
 async function editBreakingNews(id) {
-    const res = await api('getBreakingNews');
+    const res = await api('getSheetData', { sheetName: 'BreakingNews', includeAll: 'true' });
     const item = res.data.find(i => String(i.id) === String(id));
     if (!item) return;
     currentEditId = id;
@@ -472,15 +644,16 @@ async function deleteBreakingNewsItem(id) {
 }
 
 async function loadNavTabs() {
-    const res = await api('getNavTabs');
+    const res = await api('getSheetData', { sheetName: 'NavTabs', includeAll: 'true' });
     renderItemList(res.success ? res.data : [], 'navTabsList', 'label', {
         onEdit: 'editNavTab',
-        onDelete: 'deleteNavTabItem'
+        onDelete: 'deleteNavTabItem',
+        sheetName: 'NavTabs'
     });
 }
 
 async function editNavTab(id) {
-    const res = await api('getNavTabs');
+    const res = await api('getSheetData', { sheetName: 'NavTabs', includeAll: 'true' });
     const item = res.data.find(i => String(i.id) === String(id));
     if (!item) return;
     currentEditId = id;
@@ -502,14 +675,27 @@ async function deleteNavTabItem(id) {
 }
 
 async function loadStandards() {
-    const res = await api('getStandards');
+    const res = await api('getSheetData', { sheetName: 'Standards', includeAll: 'true' });
     renderItemList(res.success ? res.data : [], 'standardsList', 'standardName', {
         onEdit: 'editStandard',
-        onDelete: 'deleteStandardItem'
+        onDelete: 'deleteStandardItem',
+        sheetName: 'Standards'
     });
 }
 
-async function editStandard(id) { /* Similar pattern */ }
+async function editStandard(id) {
+    const res = await api('getSheetData', { sheetName: 'Standards', includeAll: 'true' });
+    const item = res.data.find(i => String(i.id) === String(id));
+    if (!item) return;
+    currentEditId = id;
+    openAddModal('standards');
+    setTimeout(() => {
+        document.getElementById('mName').value = item.standardName || '';
+        document.getElementById('mIcon').value = item.icon || '';
+        document.getElementById('mOrder').value = item.order || 1;
+        document.getElementById('mActive').value = String(item.active);
+    }, 100);
+}
 async function deleteStandardItem(id) {
     if (!confirm('Are you sure?')) return;
     await api('deleteStandard', { id });
@@ -517,14 +703,27 @@ async function deleteStandardItem(id) {
 }
 
 async function loadSubjects() {
-    const res = await api('getSubjects');
+    const res = await api('getSheetData', { sheetName: 'Subjects', includeAll: 'true' });
     renderItemList(res.success ? res.data : [], 'subjectsList', 'subjectName', {
         onEdit: 'editSubject',
-        onDelete: 'deleteSubjectItem'
+        onDelete: 'deleteSubjectItem',
+        sheetName: 'Subjects'
     });
 }
 
-async function editSubject(id) { /* Similar pattern */ }
+async function editSubject(id) {
+    const res = await api('getSheetData', { sheetName: 'Subjects', includeAll: 'true' });
+    const item = res.data.find(i => String(i.id) === String(id));
+    if (!item) return;
+    currentEditId = id;
+    openAddModal('subjects');
+    setTimeout(() => {
+        document.getElementById('mSubjectName').value = item.subjectName || '';
+        document.getElementById('mIcon').value = item.icon || '';
+        document.getElementById('mOrder').value = item.order || 1;
+        document.getElementById('mActive').value = String(item.active);
+    }, 100);
+}
 async function deleteSubjectItem(id) {
     if (!confirm('Are you sure?')) return;
     await api('deleteSubject', { id });
@@ -538,8 +737,37 @@ async function loadMaterialsAdmin() {
     if (stdFilter) params.standardId = stdFilter;
     if (typeFilter) params.type = typeFilter;
 
-    const res = await api('getMaterials', params);
-    renderItemList(res.success ? res.data : [], 'materialsList', 'title', {
+    // Get ALL materials (unfiltered) to extract types
+    const allRes = await api('getMaterials', {});
+    const allMaterials = allRes.success ? allRes.data : [];
+
+    // Build type filter dropdown dynamically from sheet data
+    const typeSelect = document.getElementById('matFilterType');
+    if (typeSelect) {
+        const currentVal = typeSelect.value;
+        const defaultTypes = {
+            textbook: 'પાઠ્યપુસ્તક', workbook: 'સ્વાધ્યાયપોથી',
+            testpaper: 'ટેસ્ટ પેપર', solution: 'પેપર સોલ્યુશન', other: 'અન્ય'
+        };
+        // Collect all unique types from sheet data
+        const sheetTypes = [...new Set(allMaterials.map(m => m.type).filter(Boolean))];
+        // Merge: default labels + any new types from sheet
+        const allTypes = { ...defaultTypes };
+        sheetTypes.forEach(t => { if (!allTypes[t]) allTypes[t] = t; });
+
+        typeSelect.innerHTML = '<option value="">બધા Type</option>' +
+            Object.entries(allTypes).map(([val, label]) =>
+                `<option value="${val}">${label}</option>`
+            ).join('');
+        typeSelect.value = currentVal;
+    }
+
+    // Now render filtered list
+    let displayData = allMaterials;
+    if (stdFilter) displayData = displayData.filter(m => String(m.standardId) === stdFilter);
+    if (typeFilter) displayData = displayData.filter(m => String(m.type) === typeFilter);
+
+    renderItemList(displayData, 'materialsList', 'title', {
         onEdit: 'editMaterial',
         onDelete: 'deleteMaterialItem'
     });
@@ -559,7 +787,21 @@ async function loadMaterialsAdmin() {
     }
 }
 
-async function editMaterial(id) { /* Similar pattern */ }
+async function editMaterial(id) {
+    const res = await api('getMaterials', {});
+    const item = res.data.find(i => String(i.id) === String(id));
+    if (!item) return;
+    currentEditId = id;
+    openAddModal('materials');
+    setTimeout(() => {
+        document.getElementById('mStandardId').value = item.standardId || '';
+        document.getElementById('mSubjectId').value = item.subjectId || '';
+        document.getElementById('mType').value = item.type || 'textbook';
+        document.getElementById('mTitle').value = item.title || '';
+        document.getElementById('mDriveLink').value = item.driveLink || '';
+        document.getElementById('mOrder').value = item.order || 1;
+    }, 200);
+}
 async function deleteMaterialItem(id) {
     if (!confirm('Are you sure?')) return;
     await api('deleteMaterial', { id });
@@ -567,8 +809,9 @@ async function deleteMaterialItem(id) {
 }
 
 async function loadMaterialDropdowns() {
-    const stds = await api('getStandards');
-    const subs = await api('getSubjects');
+    const [stds, subs, mats] = await Promise.all([
+        api('getStandards'), api('getSubjects'), api('getMaterials', {})
+    ]);
     const stdSelect = document.getElementById('mStandardId');
     const subSelect = document.getElementById('mSubjectId');
     if (stdSelect && stds.success) {
@@ -577,6 +820,22 @@ async function loadMaterialDropdowns() {
     if (subSelect && subs.success) {
         subSelect.innerHTML = subs.data.map(s => `<option value="${s.id}">${s.subjectName}</option>`).join('');
     }
+    // Add existing custom types to the modal type dropdown
+    const typeSelect = document.getElementById('mType');
+    if (typeSelect && mats.success) {
+        const defaultVals = ['textbook', 'workbook', 'testpaper', 'solution', 'other', '__custom__'];
+        const existingTypes = [...new Set(mats.data.map(m => m.type).filter(Boolean))];
+        existingTypes.forEach(t => {
+            if (!defaultVals.includes(t)) {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = t;
+                // Insert before the __custom__ option
+                const customOpt = typeSelect.querySelector('option[value="__custom__"]');
+                typeSelect.insertBefore(opt, customOpt);
+            }
+        });
+    }
 }
 
 // ============================================================
@@ -584,9 +843,10 @@ async function loadMaterialDropdowns() {
 // ============================================================
 
 async function loadTeacherTools() {
-    const res = await api('getTeacherTools');
+    const res = await api('getSheetData', { sheetName: 'TeacherTools', includeAll: 'true' });
     renderItemList(res.success ? res.data : [], 'teacherToolsList', 'name', {
-        onDelete: 'deleteTeacherToolItem'
+        onDelete: 'deleteTeacherToolItem',
+        sheetName: 'TeacherTools'
     });
 }
 async function deleteTeacherToolItem(id) {
@@ -596,9 +856,10 @@ async function deleteTeacherToolItem(id) {
 }
 
 async function loadOfficeTools() {
-    const res = await api('getOfficeTools');
+    const res = await api('getSheetData', { sheetName: 'OfficeTools', includeAll: 'true' });
     renderItemList(res.success ? res.data : [], 'officeToolsList', 'name', {
-        onDelete: 'deleteOfficeToolItem'
+        onDelete: 'deleteOfficeToolItem',
+        sheetName: 'OfficeTools'
     });
 }
 async function deleteOfficeToolItem(id) {
@@ -681,13 +942,27 @@ function handleFileSelect(input) {
 // ============================================================
 
 async function loadVachanLekhan() {
-    const res = await api('getVachanLekhan');
+    const res = await api('getSheetData', { sheetName: 'VachanLekhan', includeAll: 'true' });
     renderItemList(res.success ? res.data : [], 'vachanLekhanList', 'title', {
         onEdit: 'editVachanLekhan',
-        onDelete: 'deleteVachanLekhanItem'
+        onDelete: 'deleteVachanLekhanItem',
+        sheetName: 'VachanLekhan'
     });
 }
-async function editVachanLekhan(id) { /* Similar pattern */ }
+async function editVachanLekhan(id) {
+    const res = await api('getSheetData', { sheetName: 'VachanLekhan', includeAll: 'true' });
+    const item = res.data.find(i => String(i.id) === String(id));
+    if (!item) return;
+    currentEditId = id;
+    openAddModal('vachanLekhan');
+    setTimeout(() => {
+        document.getElementById('mTitle').value = item.title || '';
+        document.getElementById('mLink').value = item.link || '';
+        document.getElementById('mIcon').value = item.icon || '';
+        document.getElementById('mOrder').value = item.order || 1;
+        document.getElementById('mActive').value = String(item.active);
+    }, 100);
+}
 async function deleteVachanLekhanItem(id) {
     if (!confirm('Are you sure?')) return;
     await api('deleteVachanLekhan', { id });
@@ -695,13 +970,27 @@ async function deleteVachanLekhanItem(id) {
 }
 
 async function loadGanan() {
-    const res = await api('getGanan');
+    const res = await api('getSheetData', { sheetName: 'Ganan', includeAll: 'true' });
     renderItemList(res.success ? res.data : [], 'gananList', 'title', {
         onEdit: 'editGanan',
-        onDelete: 'deleteGananItem'
+        onDelete: 'deleteGananItem',
+        sheetName: 'Ganan'
     });
 }
-async function editGanan(id) { /* Similar pattern */ }
+async function editGanan(id) {
+    const res = await api('getSheetData', { sheetName: 'Ganan', includeAll: 'true' });
+    const item = res.data.find(i => String(i.id) === String(id));
+    if (!item) return;
+    currentEditId = id;
+    openAddModal('ganan');
+    setTimeout(() => {
+        document.getElementById('mTitle').value = item.title || '';
+        document.getElementById('mLink').value = item.link || '';
+        document.getElementById('mIcon').value = item.icon || '';
+        document.getElementById('mOrder').value = item.order || 1;
+        document.getElementById('mActive').value = String(item.active);
+    }, 100);
+}
 async function deleteGananItem(id) {
     if (!confirm('Are you sure?')) return;
     await api('deleteGanan', { id });
@@ -713,9 +1002,10 @@ async function deleteGananItem(id) {
 // ============================================================
 
 async function loadGames() {
-    const res = await api('getGames');
+    const res = await api('getSheetData', { sheetName: 'Games', includeAll: 'true' });
     renderItemList(res.success ? res.data : [], 'gamesList', 'name', {
-        onDelete: 'deleteGameItem'
+        onDelete: 'deleteGameItem',
+        sheetName: 'Games'
     });
 }
 async function deleteGameItem(id) {
@@ -729,13 +1019,27 @@ async function deleteGameItem(id) {
 // ============================================================
 
 async function loadQuizCategories() {
-    const res = await api('getQuizCategories');
+    const res = await api('getSheetData', { sheetName: 'QuizCategories', includeAll: 'true' });
     renderItemList(res.success ? res.data : [], 'quizCategoriesList', 'name', {
         onEdit: 'editQuizCategory',
-        onDelete: 'deleteQuizCategoryItem'
+        onDelete: 'deleteQuizCategoryItem',
+        sheetName: 'QuizCategories'
     });
 }
-async function editQuizCategory(id) { /* Similar pattern */ }
+async function editQuizCategory(id) {
+    const res = await api('getSheetData', { sheetName: 'QuizCategories', includeAll: 'true' });
+    const item = res.data.find(i => String(i.id) === String(id));
+    if (!item) return;
+    currentEditId = id;
+    openAddModal('quizCategories');
+    setTimeout(() => {
+        document.getElementById('mName').value = item.name || '';
+        document.getElementById('mIcon').value = item.icon || '';
+        document.getElementById('mQuestionCount').value = item.questionCount || 20;
+        document.getElementById('mOrder').value = item.order || 1;
+        document.getElementById('mActive').value = String(item.active);
+    }, 100);
+}
 async function deleteQuizCategoryItem(id) {
     if (!confirm('Are you sure?')) return;
     await api('deleteQuizCategory', { id });
@@ -819,6 +1123,12 @@ async function loadSettings() {
     document.getElementById('setFooter').value = s.footerText || '';
     document.getElementById('setAbout').value = s.aboutText || '';
     document.getElementById('setAddress').value = s.address || '';
+    document.getElementById('setSocialFacebook').value = s.socialFacebook || '';
+    document.getElementById('setSocialYoutube').value = s.socialYoutube || '';
+    document.getElementById('setSocialInstagram').value = s.socialInstagram || '';
+    document.getElementById('setSocialTwitter').value = s.socialTwitter || '';
+    document.getElementById('setSocialTelegram').value = s.socialTelegram || '';
+    document.getElementById('setSocialWhatsapp').value = s.socialWhatsapp || '';
 }
 
 async function saveSettings() {
@@ -829,7 +1139,13 @@ async function saveSettings() {
         { key: 'contactPhone', el: 'setPhone' },
         { key: 'footerText', el: 'setFooter' },
         { key: 'aboutText', el: 'setAbout' },
-        { key: 'address', el: 'setAddress' }
+        { key: 'address', el: 'setAddress' },
+        { key: 'socialFacebook', el: 'setSocialFacebook' },
+        { key: 'socialYoutube', el: 'setSocialYoutube' },
+        { key: 'socialInstagram', el: 'setSocialInstagram' },
+        { key: 'socialTwitter', el: 'setSocialTwitter' },
+        { key: 'socialTelegram', el: 'setSocialTelegram' },
+        { key: 'socialWhatsapp', el: 'setSocialWhatsapp' }
     ];
 
     for (const f of fields) {

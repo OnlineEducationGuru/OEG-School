@@ -137,7 +137,7 @@
 
 <body>
 
-    <div class="loader-overlay" id="app-loader" style="display:none;">
+    <div class="loader-overlay" id="app-loader">
         <div class="spinner"></div>
         <div class="loader-text">રજિસ્ટર થઈ રહ્યું છે...</div>
     </div>
@@ -212,6 +212,11 @@
                     <input type="text" class="form-input" id="tchRegSchool" placeholder="શાળાનું નામ">
                 </div>
                 <div class="form-group">
+                    <label class="form-label">DISE Code *</label>
+                    <input type="text" class="form-input" id="tchRegDise" maxlength="11" placeholder="11 અંકનો DISE કોડ"
+                        oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                </div>
+                <div class="form-group">
                     <label class="form-label">મોબાઈલ *</label>
                     <input type="tel" class="form-input" id="tchRegMobile" maxlength="10" placeholder="10 અંકનો મોબાઈલ">
                 </div>
@@ -278,7 +283,7 @@
 
             showLoader('Registering...');
             try {
-                const res = await api('registerStudent', { name, standard: std, school, mobile, password: pass });
+                const res = await api('registerStudent', { name, standard: std, schoolName: school, mobile, password: pass });
                 if (res.success) {
                     showToast('રજિસ્ટ્રેશન સફળ! હવે Login કરો.', 'success');
                     setTimeout(() => window.location.href = 'login.html', 1500);
@@ -302,12 +307,14 @@
 
             if (!name) { showToast('નામ નાખો', 'error'); return; }
             if (!school) { showToast('શાળાનું નામ નાખો', 'error'); return; }
+            const dise = document.getElementById('tchRegDise').value.trim();
+            if (!dise || dise.length !== 11) { showToast('સાચો 11 અંકનો DISE Code નાખો', 'error'); return; }
             if (!mobile || !isValidMobile(mobile)) { showToast('સાચો 10 અંકનો મોબાઈલ', 'error'); return; }
             if (!email || !email.includes('@')) { showToast('સાચો Email નાખો', 'error'); return; }
             if (!pass || pass.length < 6) { showToast('પાસવર્ડ ઓછામાં ઓછા 6 અક્ષરનો', 'error'); return; }
 
             showLoader('OTP Sending...');
-            teacherRegData = { name, school, mobile, email, password: pass };
+            teacherRegData = { name, schoolName: school, dise, mobile, email, password: pass };
 
             try {
                 const res = await api('registerTeacher', teacherRegData);

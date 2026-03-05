@@ -135,12 +135,76 @@
         .auth-footer a:hover {
             text-decoration: underline;
         }
+
+        .forgot-link {
+            display: block;
+            text-align: center;
+            margin-top: var(--space-sm);
+            font-size: var(--font-size-sm);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color var(--transition-fast);
+        }
+
+        .forgot-link:hover {
+            color: var(--accent-pink);
+        }
+
+        .forgot-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+
+        .forgot-modal.active {
+            display: flex;
+        }
+
+        .forgot-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            width: 100%;
+            max-width: 400px;
+            animation: scaleIn 0.3s ease;
+        }
+
+        .forgot-card h3 {
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--space-md);
+            text-align: center;
+        }
+
+        .new-pass-display {
+            background: var(--bg-surface);
+            border: 2px dashed var(--accent-green);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            text-align: center;
+            margin-top: var(--space-md);
+        }
+
+        .new-pass-display .pass-value {
+            font-size: var(--font-size-xl);
+            font-weight: 800;
+            letter-spacing: 3px;
+            color: var(--accent-green);
+        }
     </style>
 </head>
 
 <body>
 
-    <div class="loader-overlay" id="app-loader" style="display:none;">
+    <div class="loader-overlay" id="app-loader">
         <div class="spinner"></div>
         <div class="loader-text">લોડ થઈ રહ્યું છે...</div>
     </div>
@@ -170,6 +234,7 @@
                     <input type="password" class="form-input" id="stuPassword" placeholder="પાસવર્ડ">
                 </div>
                 <button class="btn btn-primary btn-full mt-md" onclick="loginStudent()">🔐 લૉગિન</button>
+                <span class="forgot-link" onclick="openForgotModal('student')">🔑 પાસવર્ડ ભૂલી ગયા?</span>
             </div>
 
             <!-- Teacher Login Form -->
@@ -184,6 +249,7 @@
                     <input type="password" class="form-input" id="tchPassword" placeholder="પાસવર્ડ">
                 </div>
                 <button class="btn btn-primary btn-full mt-md" onclick="loginTeacher()">🔐 લૉગિન</button>
+                <span class="forgot-link" onclick="openForgotModal('teacher')">🔑 પાસવર્ડ ભૂલી ગયા?</span>
             </div>
 
             <div class="auth-divider">OR</div>
@@ -198,10 +264,29 @@
         </div>
     </div>
 
+    <!-- Forgot Password Modal -->
+    <div class="forgot-modal" id="forgotModal">
+        <div class="forgot-card">
+            <h3>🔑 પાસવર્ડ રિસેટ</h3>
+            <div id="forgotBody"></div>
+            <div id="forgotResult" style="display:none;"></div>
+            <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-md);">
+                <button class="btn btn-secondary btn-full" onclick="closeForgotModal()">બંધ કરો</button>
+                <button class="btn btn-primary btn-full" id="forgotSubmitBtn" onclick="submitForgotPassword()">📩
+                    મોકલો</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/common.js"></script>
     <script>
         // Redirect if already logged in
         if (getUser()) window.location.href = 'index.html';
+
+        // Missing function - bridge to setUser
+        function userLogin(userData) {
+            setUser(userData, userData.role || 'student');
+        }
 
         function switchTab(tab, el) {
             document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
@@ -254,6 +339,111 @@
                 showToast('Login error', 'error');
             }
             hideLoader();
+        }
+
+        // ======== FORGOT PASSWORD ========
+        let forgotType = 'student';
+
+        function openForgotModal(type) {
+            forgotType = type;
+            const resultEl = document.getElementById('forgotResult');
+            resultEl.style.display = 'none';
+            resultEl.innerHTML = '';
+            document.getElementById('forgotSubmitBtn').style.display = '';
+
+            if (type === 'student') {
+                document.getElementById('forgotBody').innerHTML = `
+                    <p style="font-size:var(--font-size-sm);color:var(--text-secondary);margin-bottom:var(--space-md);">
+                        તમારો રજિસ્ટર્ડ મોબાઈલ નંબર નાખો. નવો પાસવર્ડ સ્ક્રીન પર બતાવવામાં આવશે.
+                    </p>
+                    <div class="form-group">
+                        <label class="form-label">મોબાઈલ નંબર</label>
+                        <input type="tel" class="form-input" id="forgotMobile" maxlength="10" placeholder="10 અંકનો મોબાઈલ">
+                    </div>
+                `;
+            } else {
+                document.getElementById('forgotBody').innerHTML = `
+                    <p style="font-size:var(--font-size-sm);color:var(--text-secondary);margin-bottom:var(--space-md);">
+                        તમારો રજિસ્ટર્ડ મોબાઈલ અને ઈમેલ નાખો. નવો પાસવર્ડ ઈમેલ પર મોકલવામાં આવશે.
+                    </p>
+                    <div class="form-group">
+                        <label class="form-label">મોબાઈલ નંબર</label>
+                        <input type="tel" class="form-input" id="forgotMobile" maxlength="10" placeholder="10 અંકનો મોબાઈલ">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="forgotEmail" placeholder="email@example.com">
+                    </div>
+                `;
+            }
+            document.getElementById('forgotModal').classList.add('active');
+        }
+
+        function closeForgotModal() {
+            document.getElementById('forgotModal').classList.remove('active');
+        }
+
+        async function submitForgotPassword() {
+            const mobile = document.getElementById('forgotMobile').value.trim();
+            if (!mobile || !isValidMobile(mobile)) {
+                showToast('સાચો 10 અંકનો મોબાઈલ નંબર નાખો', 'error');
+                return;
+            }
+
+            const resultEl = document.getElementById('forgotResult');
+
+            if (forgotType === 'student') {
+                showLoader('Processing...');
+                const res = await api('forgotPasswordStudent', { mobile });
+                hideLoader();
+
+                if (res.success) {
+                    document.getElementById('forgotBody').style.display = 'none';
+                    document.getElementById('forgotSubmitBtn').style.display = 'none';
+                    resultEl.style.display = 'block';
+                    resultEl.innerHTML = `
+                        <div style="text-align:center;margin-bottom:var(--space-md);">
+                            <span style="font-size:2rem;">✅</span>
+                            <p style="color:var(--text-secondary);font-size:var(--font-size-sm);margin-top:var(--space-sm);">
+                                ${res.name || 'વિદ્યાર્થી'}, તમારો નવો પાસવર્ડ:
+                            </p>
+                        </div>
+                        <div class="new-pass-display">
+                            <div class="pass-value">${res.newPassword}</div>
+                            <p style="font-size:var(--font-size-xs);color:var(--text-muted);margin-top:var(--space-xs);">આ પાસવર્ડ યાદ રાખો અથવા લખી લો</p>
+                        </div>
+                    `;
+                } else {
+                    showToast(res.error || 'Error', 'error');
+                }
+            } else {
+                const email = document.getElementById('forgotEmail').value.trim();
+                if (!email || !email.includes('@')) {
+                    showToast('સાચો Email નાખો', 'error');
+                    return;
+                }
+
+                showLoader('Processing...');
+                const res = await api('forgotPasswordTeacher', { mobile, email });
+                hideLoader();
+
+                if (res.success) {
+                    document.getElementById('forgotBody').style.display = 'none';
+                    document.getElementById('forgotSubmitBtn').style.display = 'none';
+                    resultEl.style.display = 'block';
+                    resultEl.innerHTML = `
+                        <div style="text-align:center;">
+                            <span style="font-size:2rem;">📧</span>
+                            <p style="color:var(--accent-green);font-weight:600;margin-top:var(--space-sm);">${res.message}</p>
+                            <p style="font-size:var(--font-size-sm);color:var(--text-muted);margin-top:var(--space-xs);">
+                                કૃપયા તમારું Email ચેક કરો અને નવા પાસવર્ડ વડે Login કરો.
+                            </p>
+                        </div>
+                    `;
+                } else {
+                    showToast(res.error || 'Error', 'error');
+                }
+            }
         }
 
         // Enter key support
