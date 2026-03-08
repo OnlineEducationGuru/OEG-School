@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="વિષયો - Subject-wise Materials for All Standards | Online Education Guru">
+    <meta name="description" content="વિષયો - Subject-wise Materials | Online Education Guru">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#6c63ff">
     <title>વિષયો - Online Education Guru</title>
@@ -12,7 +12,6 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="css/common.css">
     <style>
-        /* Subject-specific styles */
         .material-type-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -31,15 +30,12 @@
             animation: fadeInUp 0.4s ease both;
         }
 
-        .type-card:hover {
-            border-color: var(--border-glow);
-            box-shadow: var(--shadow-glow);
-            transform: translateY(-2px);
-        }
-
+        .type-card:hover,
         .type-card.active {
             border-color: var(--primary);
+            box-shadow: var(--shadow-glow);
             background: var(--primary-glow);
+            transform: translateY(-2px);
         }
 
         .type-icon {
@@ -50,65 +46,6 @@
         .type-name {
             font-size: var(--font-size-sm);
             font-weight: 600;
-        }
-
-        .subject-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--space-xs);
-            padding: 6px 14px;
-            border-radius: 100px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            font-size: var(--font-size-sm);
-            font-weight: 500;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            white-space: nowrap;
-        }
-
-        .subject-chip:hover,
-        .subject-chip.active {
-            background: var(--primary-glow);
-            border-color: var(--primary);
-            color: var(--primary-light);
-        }
-
-        .chips-scroll {
-            display: flex;
-            gap: var(--space-sm);
-            overflow-x: auto;
-            padding: var(--space-sm) 0;
-            scrollbar-width: none;
-        }
-
-        .chips-scroll::-webkit-scrollbar {
-            display: none;
-        }
-
-        .std-selector {
-            display: flex;
-            gap: var(--space-sm);
-            flex-wrap: wrap;
-            margin-bottom: var(--space-lg);
-        }
-
-        .std-chip {
-            padding: 6px 16px;
-            border-radius: 100px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            font-size: var(--font-size-sm);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-
-        .std-chip:hover,
-        .std-chip.active {
-            background: var(--primary-glow);
-            border-color: var(--primary);
-            color: var(--primary-light);
         }
     </style>
     <!-- Google AdSense -->
@@ -136,12 +73,12 @@
 
             <!-- Page Header -->
             <div class="page-header">
-                <button class="back-btn" onclick="history.back()">←</button>
-                <h1 class="page-title">📚 વિષયો</h1>
+                <button class="back-btn" onclick="window.location.href='index.html'">←</button>
+                <h1 class="page-title">📚 વિષયો મુજબ મટિરિયલ્સ</h1>
             </div>
 
             <!-- Ad Banner -->
-            <div class="ad-container" data-ad-slot="5555555501" data-ad-format="auto"></div>
+            <div class="ad-container" data-ad-slot="6666666601" data-ad-format="auto"></div>
 
             <!-- Step 1: Subject Selection -->
             <section class="section" id="subjectSelectSection">
@@ -149,8 +86,8 @@
                     <span class="icon">📚</span>
                     વિષય પસંદ કરો
                 </div>
-                <div class="folder-grid" id="subjectsGrid">
-                    <!-- Loaded dynamically -->
+                <div class="folder-grid" id="subjectGrid">
+                    <!-- Subject cards loaded dynamically -->
                 </div>
             </section>
 
@@ -160,41 +97,22 @@
                     <span class="icon">📖</span>
                     ધોરણ પસંદ કરો - <span id="selectedSubjectName" style="color:var(--accent-cyan);"></span>
                 </div>
-                <div class="std-selector" id="stdSelector">
-                    <!-- Standard chips -->
+                <div class="folder-grid" id="standardsGrid">
+                    <!-- Loaded dynamically -->
                 </div>
             </section>
 
             <!-- Ad Banner -->
-            <div class="ad-container" data-ad-slot="5555555502" data-ad-format="auto"></div>
+            <div class="ad-container" data-ad-slot="6666666602" data-ad-format="auto"></div>
 
             <!-- Step 3: Material Type Selection (shown after standard select) -->
             <section class="section hidden" id="typeSelectSection">
                 <div class="section-title">
                     <span class="icon">📁</span>
-                    સામગ્રી પ્રકાર - <span id="selectedStdName" style="color:var(--accent-cyan);"></span>
+                    સામગ્રી પ્રકાર - <span id="selectedBreadcrumb" style="color:var(--accent-cyan);"></span>
                 </div>
                 <div class="material-type-grid" id="typeGrid">
-                    <div class="type-card" data-type="textbook" onclick="selectType('textbook', this)">
-                        <div class="type-icon">📕</div>
-                        <div class="type-name">પાઠ્યપુસ્તક</div>
-                    </div>
-                    <div class="type-card" data-type="workbook" onclick="selectType('workbook', this)">
-                        <div class="type-icon">📗</div>
-                        <div class="type-name">સ્વાધ્યાયપોથી</div>
-                    </div>
-                    <div class="type-card" data-type="testpaper" onclick="selectType('testpaper', this)">
-                        <div class="type-icon">📝</div>
-                        <div class="type-name">ટેસ્ટ પેપર</div>
-                    </div>
-                    <div class="type-card" data-type="solution" onclick="selectType('solution', this)">
-                        <div class="type-icon">✅</div>
-                        <div class="type-name">પેપર સોલ્યુશન</div>
-                    </div>
-                    <div class="type-card" data-type="other" onclick="selectType('other', this)">
-                        <div class="type-icon">📂</div>
-                        <div class="type-name">અન્ય</div>
-                    </div>
+                    <!-- Type cards loaded dynamically -->
                 </div>
             </section>
 
@@ -210,7 +128,7 @@
             </section>
 
             <!-- Ad Banner Bottom -->
-            <div class="ad-container ad-container-rect" data-ad-slot="5555555503" data-ad-format="auto"></div>
+            <div class="ad-container ad-container-rect" data-ad-slot="6666666603" data-ad-format="auto"></div>
 
         </div>
     </main>
@@ -224,35 +142,32 @@
         let selectedSubjectId = null;
         let selectedStdId = null;
         let selectedType = null;
-        let allSubjects = [];
         let allStandards = [];
+        let allSubjects = [];
+
+        // Known type mappings (Gujarati name + icon)
+        const knownTypes = {
+            textbook: { name: 'પાઠ્યપુસ્તક', icon: '📕' },
+            workbook: { name: 'સ્વાધ્યાયપોથી', icon: '📗' },
+            testpaper: { name: 'ટેસ્ટ પેપર', icon: '📝' },
+            solution: { name: 'પેપર સોલ્યુશન', icon: '✅' },
+            other: { name: 'અન્ય', icon: '📂' }
+        };
 
         document.addEventListener('DOMContentLoaded', async function () {
             showLoader();
 
             // Check if subject ID is passed via URL
-            const urlSubjectId = getUrlParam('id');
+            const urlSubjectId = getUrlParam('id') || getUrlParam('subjectId');
+            const urlStdId = getUrlParam('stdId');
 
             try {
-                // Load subjects
-                renderSkeletonFolders('subjectsGrid', 10);
+                // Load subjects first (Step 1)
                 const subRes = await apiCached('getSubjects');
                 allSubjects = subRes.success ? subRes.data : getDefaultSubjectsList();
 
-                renderFolderGrid(allSubjects.map(s => ({
-                    id: s.id,
-                    name: s.subjectName,
-                    icon: s.icon || '📚'
-                })), 'subjectsGrid');
-
-                // Add click handlers to folder cards
-                document.querySelectorAll('#subjectsGrid .folder-card').forEach(card => {
-                    card.href = 'javascript:void(0)';
-                    card.addEventListener('click', function () {
-                        const id = this.dataset.id;
-                        selectSubject(id);
-                    });
-                });
+                // Render subject chips
+                renderSubjectChips();
 
                 // Load standards
                 const stdRes = await apiCached('getStandards');
@@ -260,74 +175,151 @@
 
                 // If subject ID in URL, auto-select
                 if (urlSubjectId) {
-                    selectSubject(urlSubjectId);
+                    const chip = document.querySelector(`.subject-chip[data-id="${urlSubjectId}"]`);
+                    selectSubject(urlSubjectId, chip);
+
+                    // If standard ID also in URL, auto-select
+                    if (urlStdId) {
+                        setTimeout(() => selectStandard(urlStdId), 300);
+                    }
                 }
 
             } catch (err) {
                 console.error('Error:', err);
                 allSubjects = getDefaultSubjectsList();
                 allStandards = getDefaultStandardsList();
-                renderFolderGrid(allSubjects.map(s => ({
-                    id: s.id, name: s.subjectName, icon: s.icon || '📚'
-                })), 'subjectsGrid');
+                renderSubjectChips();
             }
 
             hideLoader();
         });
 
-        function selectSubject(subjectId) {
-            selectedSubjectId = subjectId;
-            const subject = allSubjects.find(s => String(s.id) === String(subjectId));
-            if (!subject) return;
+        function renderSubjectChips() {
+            renderFolderGrid(allSubjects.map(s => ({
+                id: s.id,
+                name: s.subjectName,
+                icon: s.icon || '📚'
+            })), 'subjectGrid');
 
-            document.getElementById('selectedSubjectName').textContent = subject.subjectName || '';
+            // Add click handlers to subject folder cards
+            document.querySelectorAll('#subjectGrid .folder-card').forEach(card => {
+                card.href = 'javascript:void(0)';
+                card.addEventListener('click', function () {
+                    selectSubject(this.dataset.id, this);
+                });
+            });
+        }
 
-            // Highlight selected subject
-            document.querySelectorAll('#subjectsGrid .folder-card').forEach(card => {
-                card.style.opacity = card.dataset.id === String(subjectId) ? '1' : '0.4';
-                card.style.borderColor = card.dataset.id === String(subjectId) ? 'var(--primary)' : '';
+        function selectSubject(subId, el) {
+            selectedSubjectId = subId;
+            const sub = allSubjects.find(s => String(s.id) === String(subId));
+
+            // Highlight selected subject card
+            document.querySelectorAll('#subjectGrid .folder-card').forEach(card => {
+                card.style.opacity = card.dataset.id === String(subId) ? '1' : '0.4';
+                card.style.borderColor = card.dataset.id === String(subId) ? 'var(--primary)' : '';
             });
 
-            // Show standard selector
+            document.getElementById('selectedSubjectName').textContent = sub?.subjectName || '';
+
+            // Show standard selection
             const stdSection = document.getElementById('stdSelectSection');
             stdSection.classList.remove('hidden');
 
-            const stdSelector = document.getElementById('stdSelector');
-            stdSelector.innerHTML = allStandards.map(s => `
-        <button class="std-chip" data-id="${s.id}" onclick="selectStandard('${s.id}', this)">
-          ${s.icon || '📖'} ${s.standardName}
-        </button>
-      `).join('');
+            // Render standards grid
+            renderFolderGrid(allStandards.map(s => ({
+                id: s.id,
+                name: s.standardName,
+                icon: s.icon || '📖'
+            })), 'standardsGrid');
 
-            // Scroll to standard section
+            // Add click handlers to folder cards
+            document.querySelectorAll('#standardsGrid .folder-card').forEach(card => {
+                card.href = 'javascript:void(0)';
+                card.addEventListener('click', function () {
+                    selectStandard(this.dataset.id);
+                });
+            });
+
             stdSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
             // Hide subsequent sections
             document.getElementById('typeSelectSection').classList.add('hidden');
             document.getElementById('materialsSection').classList.add('hidden');
+
+            // Reset selections
+            selectedStdId = null;
+            selectedType = null;
         }
 
-        function selectStandard(stdId, el) {
+        async function selectStandard(stdId) {
             selectedStdId = stdId;
             const std = allStandards.find(s => String(s.id) === String(stdId));
+            const sub = allSubjects.find(s => String(s.id) === String(selectedSubjectId));
+            if (!std) return;
 
-            // Highlight chip
-            document.querySelectorAll('.std-chip').forEach(c => c.classList.remove('active'));
-            if (el) el.classList.add('active');
+            // Highlight selected standard
+            document.querySelectorAll('#standardsGrid .folder-card').forEach(card => {
+                card.style.opacity = card.dataset.id === String(stdId) ? '1' : '0.4';
+                card.style.borderColor = card.dataset.id === String(stdId) ? 'var(--primary)' : '';
+            });
 
-            document.getElementById('selectedStdName').textContent =
-                (allSubjects.find(s => String(s.id) === String(selectedSubjectId))?.subjectName || '') +
-                ' → ' + (std?.standardName || '');
+            // Update breadcrumb
+            document.getElementById('selectedBreadcrumb').textContent =
+                (sub?.subjectName || '') + ' → ' + (std.standardName || '');
 
-            // Show type selection
-            document.getElementById('typeSelectSection').classList.remove('hidden');
-            document.getElementById('typeSelectSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Show type selection with loading
+            const typeSection = document.getElementById('typeSelectSection');
+            typeSection.classList.remove('hidden');
+            const typeGrid = document.getElementById('typeGrid');
+            typeGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:var(--space-lg);color:var(--text-muted);">સામગ્રી પ્રકાર લોડ થઈ રહ્યા છે...</div>';
 
             // Hide materials
             document.getElementById('materialsSection').classList.add('hidden');
 
-            // Reset type selection
-            document.querySelectorAll('.type-card').forEach(c => c.classList.remove('active'));
+            // Always show 5 known types + any extra custom types from the sheet
+            try {
+                const res = await api('getMaterials', {
+                    standardId: selectedStdId,
+                    subjectId: selectedSubjectId
+                });
+
+                // Start with all 5 known types (always shown)
+                let allTypes = Object.entries(knownTypes).map(([type, info]) => ({
+                    type, name: info.name, icon: info.icon
+                }));
+
+                // Find extra custom types from the sheet data that are NOT in known types
+                if (res.success && res.data.length > 0) {
+                    const sheetTypes = [...new Set(res.data.map(m => String(m.type)).filter(Boolean))];
+                    const knownTypeKeys = Object.keys(knownTypes);
+                    const extraTypes = sheetTypes.filter(t => !knownTypeKeys.includes(t));
+
+                    // Add extra custom types after the known ones
+                    extraTypes.forEach(t => {
+                        allTypes.push({ type: t, name: t, icon: '📄' });
+                    });
+                }
+
+                typeGrid.innerHTML = allTypes.map((item, i) => `
+                    <div class="type-card" data-type="${item.type}" onclick="selectType('${item.type}', this)" style="animation-delay:${i * 0.08}s">
+                        <div class="type-icon">${item.icon}</div>
+                        <div class="type-name">${item.name}</div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error('Error loading types:', err);
+                // Fallback: show all 5 known types
+                typeGrid.innerHTML = Object.entries(knownTypes).map(([type, info], i) => `
+                    <div class="type-card" data-type="${type}" onclick="selectType('${type}', this)" style="animation-delay:${i * 0.08}s">
+                        <div class="type-icon">${info.icon}</div>
+                        <div class="type-name">${info.name}</div>
+                    </div>
+                `).join('');
+            }
+
+            typeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         async function selectType(type, el) {
@@ -337,14 +329,8 @@
             document.querySelectorAll('.type-card').forEach(c => c.classList.remove('active'));
             if (el) el.classList.add('active');
 
-            const typeNames = {
-                textbook: 'પાઠ્યપુસ્તક',
-                workbook: 'સ્વાધ્યાયપોથી',
-                testpaper: 'ટેસ્ટ પેપર',
-                solution: 'પેપર સોલ્યુશન',
-                other: 'અન્ય'
-            };
-            document.getElementById('materialsTitle').textContent = typeNames[type] || 'મટિરિયલ્સ';
+            const known = knownTypes[type];
+            document.getElementById('materialsTitle').textContent = known ? known.name : type;
 
             // Show materials section
             const matSection = document.getElementById('materialsSection');
@@ -361,39 +347,40 @@
 
                 if (res.success && res.data.length > 0) {
                     const container = document.getElementById('materialsList');
+                    const typeIcon = known ? known.icon : '📄';
                     container.innerHTML = res.data.map((item, i) => `
-            <div class="material-card" style="animation-delay:${i * 0.08}s">
-              <div class="material-icon">${type === 'textbook' ? '📕' : type === 'workbook' ? '📗' : type === 'testpaper' ? '📝' : type === 'solution' ? '✅' : '📂'}</div>
-              <div class="material-info">
-                <div class="material-title">${item.title || 'Untitled'}</div>
-              </div>
-              <div class="material-actions">
-                ${item.driveLink ? `
-                  <a href="${item.driveLink}" target="_blank" class="btn btn-sm btn-secondary">👁️ View</a>
-                  <a href="${getDriveDownloadLink(item.driveLink)}" target="_blank" class="btn btn-sm btn-primary">⬇️ Download</a>
-                ` : '<span class="badge badge-danger">No Link</span>'}
-              </div>
-            </div>
-          `).join('');
+                        <div class="material-card" style="animation-delay:${i * 0.08}s">
+                            <div class="material-icon">${typeIcon}</div>
+                            <div class="material-info">
+                                <div class="material-title">${item.title || 'Untitled'}</div>
+                            </div>
+                            <div class="material-actions">
+                                ${item.driveLink ? `
+                                    <a href="pdf.html?url=${encodeURIComponent(item.driveLink)}&name=${encodeURIComponent(item.title || 'PDF')}&back=subjects.html" class="btn btn-sm btn-secondary">👁️ View</a>
+                                    <a href="${getDriveDownloadLink(item.driveLink)}" target="_blank" class="btn btn-sm btn-primary">⬇️ Download</a>
+                                ` : '<span class="badge badge-danger">No Link</span>'}
+                            </div>
+                        </div>
+                    `).join('');
                 } else {
                     document.getElementById('materialsList').innerHTML = `
-            <div class="empty-state">
-              <div class="empty-icon">📋</div>
-              <div class="empty-text">આ કેટેગરીમાં હાલમાં કોઈ મટિરિયલ ઉપલબ્ધ નથી.</div>
-              <p style="color:var(--text-muted);font-size:var(--font-size-xs);margin-top:var(--space-sm);">
-                Admin Panel માંથી મટિરિયલ ઉમેરો.
-              </p>
-            </div>
-          `;
+                        <div class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            <div class="empty-text">આ કેટેગરીમાં હાલમાં કોઈ મટિરિયલ ઉપલબ્ધ નથી.</div>
+                            <p style="color:var(--text-muted);font-size:var(--font-size-xs);margin-top:var(--space-sm);">
+                                Admin Panel માંથી મટિરિયલ ઉમેરો.
+                            </p>
+                        </div>
+                    `;
                 }
             } catch (err) {
                 console.error('Error loading materials:', err);
                 document.getElementById('materialsList').innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">⚠️</div>
-            <div class="empty-text">મટિરિયલ લોડ કરવામાં સમસ્યા.</div>
-          </div>
-        `;
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <div class="empty-text">મટિરિયલ લોડ કરવામાં સમસ્યા.</div>
+                    </div>
+                `;
             }
 
             matSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -402,7 +389,6 @@
         // Convert Google Drive view link to download link
         function getDriveDownloadLink(viewLink) {
             if (!viewLink) return '#';
-            // If it's a Google Drive file link, try to convert to download
             const match = viewLink.match(/\/d\/([a-zA-Z0-9_-]+)/);
             if (match) {
                 return `https://drive.google.com/uc?export=download&id=${match[1]}`;
@@ -411,21 +397,6 @@
         }
 
         // Default data
-        function getDefaultSubjectsList() {
-            return [
-                { id: 1, subjectName: 'ગુજરાતી', icon: '📝' },
-                { id: 2, subjectName: 'હિન્દી', icon: '📝' },
-                { id: 3, subjectName: 'English', icon: '📝' },
-                { id: 4, subjectName: 'ગણિત', icon: '🔢' },
-                { id: 5, subjectName: 'વિજ્ઞાન', icon: '🔬' },
-                { id: 6, subjectName: 'સામાજિક વિજ્ઞાન', icon: '🌍' },
-                { id: 7, subjectName: 'સંસ્કૃત', icon: '📜' },
-                { id: 8, subjectName: 'ચિત્રકામ', icon: '🎨' },
-                { id: 9, subjectName: 'શારીરિક શિક્ષણ', icon: '🏃' },
-                { id: 10, subjectName: 'કમ્પ્યુટર', icon: '💻' }
-            ];
-        }
-
         function getDefaultStandardsList() {
             return [
                 { id: 1, standardName: 'બાલ વાટિકા', icon: '💒' },
@@ -441,6 +412,21 @@
                 { id: 11, standardName: 'ધોરણ 10', icon: '🔟' },
                 { id: 12, standardName: 'ધોરણ 11', icon: '📘' },
                 { id: 13, standardName: 'ધોરણ 12', icon: '📗' }
+            ];
+        }
+
+        function getDefaultSubjectsList() {
+            return [
+                { id: 1, subjectName: 'ગુજરાતી', icon: '📝' },
+                { id: 2, subjectName: 'હિન્દી', icon: '📝' },
+                { id: 3, subjectName: 'English', icon: '📝' },
+                { id: 4, subjectName: 'ગણિત', icon: '🔢' },
+                { id: 5, subjectName: 'વિજ્ઞાન', icon: '🔬' },
+                { id: 6, subjectName: 'સામાજિક વિજ્ઞાન', icon: '🌍' },
+                { id: 7, subjectName: 'સંસ્કૃત', icon: '📜' },
+                { id: 8, subjectName: 'ચિત્રકામ', icon: '🎨' },
+                { id: 9, subjectName: 'શારીરિક શિક્ષણ', icon: '🏃' },
+                { id: 10, subjectName: 'કમ્પ્યુટર', icon: '💻' }
             ];
         }
     </script>

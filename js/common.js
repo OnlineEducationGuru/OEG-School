@@ -11,7 +11,7 @@ const APP_CACHE = {};
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 // ---- PERSISTENT CACHE (localStorage) ----
-const LS_CACHE_PREFIX = 'oeg_cache_';
+const LS_CACHE_PREFIX = 'oeg_cache_v2_';
 const LS_CACHE_TTL = 15 * 60 * 1000; // 15 minutes persistent cache
 
 // ============================================================
@@ -20,11 +20,12 @@ const LS_CACHE_TTL = 15 * 60 * 1000; // 15 minutes persistent cache
 
 async function api(action, params = {}) {
   try {
-    const url = API_BASE + '?action=' + encodeURIComponent(action);
+    const url = API_BASE + '?action=' + encodeURIComponent(action) + '&_t=' + Date.now();
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(params)
+      body: JSON.stringify(params),
+      cache: 'no-store'
     });
     const data = await response.json();
     return data;
@@ -192,7 +193,7 @@ function convertDriveUrl(url) {
 function getDefaultNavTabs() {
   return [
     { label: 'હોમ', link: 'index.html', icon: '🏠' },
-    { label: 'ધોરણ', link: 'index.html#standards', icon: '📖' },
+    { label: 'ધોરણ', link: 'standard.html', icon: '📖' },
     { label: 'વિષયો', link: 'subjects.html', icon: '📚' },
     { label: 'ક્વિઝ', link: 'quiz.html', icon: '❓' },
     { label: 'Teacher Tools', link: 'teacher-tools.html', icon: '🛠️' },
@@ -684,4 +685,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Init ad slots
   setTimeout(initAdSlots, 1000);
+
+  // Hide URL params after .html on all pages (delay to allow page scripts to capture params first)
+  setTimeout(function () {
+    if (window.history && window.history.replaceState && window.location.search) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, 100);
 });

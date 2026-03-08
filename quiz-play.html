@@ -12,20 +12,112 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="css/common.css">
     <style>
-        .quiz-container {
-            max-width: 600px;
+        /* Quiz page layout - scrollable */
+        .quiz-page-layout {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: var(--space-lg);
+            max-width: 1200px;
             margin: 0 auto;
+            width: 100%;
+            padding: var(--space-sm);
+            min-height: calc(100vh - 160px);
         }
 
+        .side-ad {
+            display: none;
+            width: 160px;
+            flex-shrink: 0;
+        }
+
+        .quiz-wrapper {
+            flex: 1;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            padding: var(--space-xs) 0;
+        }
+
+        /* Back + Info bar */
+        .quiz-info-bar {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-xs) var(--space-sm);
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            margin-bottom: var(--space-xs);
+            flex-shrink: 0;
+        }
+
+        .quiz-info-bar .back-btn {
+            width: 32px;
+            height: 32px;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .quiz-info-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .quiz-info-meta {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Quiz info label - ધોરણ/વિષય/ચેપ્ટર banner above progress bar */
+        .quiz-info-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: 6px var(--space-sm);
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.1), rgba(0, 200, 150, 0.1));
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-xs);
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .quiz-info-label .info-tag {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            padding: 2px 8px;
+            background: var(--bg-card);
+            border-radius: 100px;
+            border: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .quiz-info-chapter {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Header bar */
         .quiz-header-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: var(--space-md);
+            padding: var(--space-xs) var(--space-sm);
             background: var(--bg-card);
-            border-radius: var(--radius-lg);
+            border-radius: var(--radius-md);
             border: 1px solid var(--border-color);
-            margin-bottom: var(--space-lg);
+            margin-bottom: var(--space-xs);
+            flex-shrink: 0;
         }
 
         .quiz-counter {
@@ -38,7 +130,7 @@
             display: flex;
             align-items: center;
             gap: var(--space-xs);
-            padding: 4px 12px;
+            padding: 3px 10px;
             border-radius: 100px;
             background: rgba(0, 200, 150, 0.15);
             color: var(--accent-green);
@@ -46,42 +138,50 @@
             font-size: var(--font-size-sm);
         }
 
+        /* Question area */
+        #questionArea {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
         .question-card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-xl);
-            padding: var(--space-xl);
-            margin-bottom: var(--space-lg);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
             animation: fadeInUp 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         .question-number {
             font-size: var(--font-size-xs);
             color: var(--primary-light);
             font-weight: 600;
-            margin-bottom: var(--space-sm);
+            margin-bottom: var(--space-xs);
         }
 
         .question-text {
-            font-size: var(--font-size-lg);
+            font-size: var(--font-size-md);
             font-weight: 600;
-            line-height: 1.8;
-            margin-bottom: var(--space-lg);
+            line-height: 1.6;
+            margin-bottom: var(--space-sm);
         }
 
         .quiz-option {
             display: flex;
             align-items: center;
-            gap: var(--space-md);
+            gap: var(--space-sm);
             width: 100%;
-            padding: var(--space-md) var(--space-lg);
+            padding: var(--space-sm) var(--space-md);
             background: var(--bg-surface);
             border: 2px solid var(--border-color);
             border-radius: var(--radius-md);
             text-align: left;
             transition: all var(--transition-fast);
-            margin-bottom: var(--space-sm);
-            font-size: var(--font-size-md);
+            margin-bottom: 6px;
+            font-size: var(--font-size-sm);
             cursor: pointer;
             color: var(--text-primary);
             position: relative;
@@ -113,15 +213,15 @@
         }
 
         .opt-label {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: var(--radius-full);
             background: var(--bg-glass-light);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: var(--font-size-sm);
+            font-size: var(--font-size-xs);
             flex-shrink: 0;
         }
 
@@ -139,14 +239,15 @@
             flex: 1;
         }
 
+        /* Next button */
         .quiz-nav-btns {
-            display: flex;
-            gap: var(--space-md);
-            margin-top: var(--space-lg);
+            flex-shrink: 0;
+            padding-top: var(--space-xs);
         }
 
         .quiz-nav-btns .btn {
-            flex: 1;
+            width: 100%;
+            padding: var(--space-sm);
         }
 
         /* Result screen */
@@ -154,18 +255,18 @@
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-xl);
-            padding: var(--space-2xl);
+            padding: var(--space-xl);
             text-align: center;
             animation: scaleIn 0.4s ease;
         }
 
         .result-emoji {
-            font-size: 4rem;
-            margin-bottom: var(--space-md);
+            font-size: 3rem;
+            margin-bottom: var(--space-sm);
         }
 
         .result-score {
-            font-size: var(--font-size-3xl);
+            font-size: var(--font-size-2xl);
             font-weight: 800;
             background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
             -webkit-background-clip: text;
@@ -174,23 +275,34 @@
         }
 
         .result-percentage {
-            font-size: var(--font-size-xl);
+            font-size: var(--font-size-lg);
             font-weight: 700;
             color: var(--accent-cyan);
-            margin-top: var(--space-sm);
+            margin-top: var(--space-xs);
         }
 
         .result-message {
-            font-size: var(--font-size-md);
+            font-size: var(--font-size-sm);
             color: var(--text-secondary);
-            margin: var(--space-md) 0;
+            margin: var(--space-sm) 0;
         }
 
         .result-actions {
             display: flex;
             flex-direction: column;
-            gap: var(--space-sm);
-            margin-top: var(--space-lg);
+            gap: var(--space-xs);
+            margin-top: var(--space-md);
+        }
+
+        .result-actions .btn {
+            font-size: var(--font-size-sm);
+            padding: var(--space-sm);
+        }
+
+        @media (min-width: 900px) {
+            .side-ad {
+                display: block;
+            }
         }
     </style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1217460377621795"
@@ -199,30 +311,47 @@
 
 <body>
 
+    <!-- Header -->
+    <header class="site-header" id="site-header" style="flex-shrink: 0;"></header>
+
     <div class="loader-overlay" id="app-loader">
         <div class="spinner"></div>
         <div class="loader-text">ક્વિઝ લોડ થઈ રહ્યું છે...</div>
     </div>
 
-    <main style="padding:var(--space-md);padding-top:var(--space-lg);min-height:100vh;">
-        <div class="quiz-container">
+    <main class="quiz-page-layout">
+        <!-- Left Ad (Desktop) -->
+        <div class="side-ad">
+            <div class="ad-container" data-ad-slot="9999999911" data-ad-format="vertical" style="height:100%"></div>
+        </div>
+
+        <!-- Quiz Area -->
+        <div class="quiz-wrapper">
+
+            <!-- Info Bar with Back Button -->
+            <div class="quiz-info-bar" id="quizInfoBar">
+                <button class="back-btn" onclick="confirmExit()" title="પાછા જાઓ">←</button>
+                <div class="quiz-info-details">
+                    <div class="quiz-info-chapter" id="quizInfoChapter">ક્વિઝ</div>
+                    <div class="quiz-info-meta" id="quizInfoMeta"></div>
+                </div>
+            </div>
 
             <!-- Quiz Header -->
             <div class="quiz-header-bar" id="quizHeaderBar">
-                <button class="back-btn" onclick="confirmExit()"
-                    style="width:36px;height:36px;font-size:1rem;">✕</button>
-                <div class="quiz-counter"><span id="currentQ">1</span> / <span id="totalQ">0</span></div>
+                <div class="quiz-counter">પ્રશ્ન <span id="currentQ">1</span> / <span id="totalQ">0</span></div>
                 <div class="quiz-score-badge">⭐ <span id="liveScore">0</span></div>
             </div>
 
-            <!-- Progress Bar -->
-            <div class="quiz-progress" id="quizProgress">
-                <div class="quiz-progress-bar" id="quizProgressBar" style="width:0%"></div>
+            <!-- ધોરણ/વિષય/ચેપ્ટર Info Label -->
+            <div class="quiz-info-label" id="quizInfoLabel" style="display:none;">
+                <!-- Populated by setQuizInfo() -->
             </div>
 
-            <!-- Ad between questions -->
-            <div class="ad-container" data-ad-slot="9999999901" data-ad-format="auto" id="quizAdTop"
-                style="display:none;"></div>
+            <!-- Progress Bar -->
+            <div class="quiz-progress" id="quizProgress" style="flex-shrink: 0;">
+                <div class="quiz-progress-bar" id="quizProgressBar" style="width:0%"></div>
+            </div>
 
             <!-- Question Area -->
             <div id="questionArea">
@@ -235,10 +364,18 @@
             </div>
 
             <!-- Result Area (hidden initially) -->
-            <div id="resultArea" style="display:none;"></div>
+            <div id="resultArea" style="display:none; flex: 1; overflow-y: auto;"></div>
 
         </div>
+
+        <!-- Right Ad (Desktop) -->
+        <div class="side-ad">
+            <div class="ad-container" data-ad-slot="9999999912" data-ad-format="vertical" style="height:100%"></div>
+        </div>
     </main>
+
+    <!-- Footer -->
+    <footer class="site-footer" id="site-footer" style="flex-shrink: 0;"></footer>
 
     <script src="js/common.js"></script>
     <script>
@@ -254,14 +391,87 @@
         const categoryId = params.get('categoryId') || '';
         const categoryName = params.get('categoryName') || 'Quiz';
         const questionCount = parseInt(params.get('questionCount')) || 20;
-        const studentName = params.get('studentName') || '';
-        const mobile = params.get('mobile') || '';
         const stdId = params.get('stdId') || '';
         const subjectId = params.get('subjectId') || '';
         const chapter = params.get('chapter') || '';
 
+        // Display names passed directly from quiz.html (primary source)
+        const urlStdName = params.get('stdName') || '';
+        const urlSubjectName = params.get('subjectName') || '';
+        const urlChapterName = params.get('chapterName') || '';
+
+        // Get student info from logged-in user, fallback to URL params
+        const _loggedUser = (typeof getUser === 'function') ? getUser() : null;
+        const studentName = (_loggedUser && (_loggedUser.name || _loggedUser.fullName)) || params.get('studentName') || '';
+        const mobile = (_loggedUser && (_loggedUser.mobile || _loggedUser.phone)) || params.get('mobile') || '';
+
+        // Keep URL params visible (removing them causes info bar to lose data on re-renders)
+
+        // Set quiz info bar
+        async function setQuizInfo() {
+            // Use URL-passed names first, then try API resolve
+            let stdName = urlStdName;
+            let subName = urlSubjectName;
+            let chapName = urlChapterName || chapter;
+
+            // If names not passed via URL, try API
+            try {
+                if (!stdName && stdId) {
+                    const stdRes = await apiCached('getStandards');
+                    if (stdRes.success) {
+                        const std = stdRes.data.find(s => String(s.id) === String(stdId));
+                        stdName = std ? std.standardName : '';
+                    }
+                }
+                if (!subName && subjectId) {
+                    const subRes = await apiCached('getSubjects');
+                    if (subRes.success) {
+                        const sub = subRes.data.find(s => String(s.id) === String(subjectId));
+                        subName = sub ? sub.subjectName : '';
+                    }
+                }
+            } catch (e) {
+                console.error('Error resolving quiz info:', e);
+            }
+
+            const chapterEl = document.getElementById('quizInfoChapter');
+            const metaEl = document.getElementById('quizInfoMeta');
+            const infoLabel = document.getElementById('quizInfoLabel');
+
+            // Build info tags for the label bar
+            let infoTags = [];
+            if (stdName) infoTags.push('📖 ' + stdName);
+            if (subName) infoTags.push('📚 ' + subName);
+            if (chapName) infoTags.push('📝 ' + chapName);
+
+            if (infoTags.length > 0) {
+                infoLabel.innerHTML = infoTags.map(t => `<span class="info-tag">${t}</span>`).join('');
+                infoLabel.style.display = 'flex';
+            }
+
+            // Build info display
+            let metaParts = [];
+            if (stdName) metaParts.push('📖 ' + stdName);
+            if (subName) metaParts.push('📚 ' + subName);
+
+            if (chapName) {
+                chapterEl.textContent = chapName;
+            } else if (categoryName && categoryName !== 'Quiz') {
+                chapterEl.textContent = categoryName;
+            } else {
+                chapterEl.textContent = 'ક્વિઝ';
+            }
+
+            if (metaParts.length > 0) {
+                metaEl.textContent = metaParts.join(' • ');
+            } else if (categoryName) {
+                metaEl.textContent = categoryName;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async function () {
             showLoader();
+            await setQuizInfo();
 
             try {
                 const res = await api('getQuizQuestions', {
@@ -285,13 +495,13 @@
 
         function showNoQuestions() {
             document.getElementById('questionArea').innerHTML = `
-        <div class="result-card">
-          <div class="result-emoji">😔</div>
-          <h2 style="margin-bottom:var(--space-md);">કોઈ પ્રશ્ન ઉપલબ્ધ નથી</h2>
-          <p style="color:var(--text-secondary);">આ કેટેગરીમાં હજુ સુધી કોઈ પ્રશ્ન ઉમેરાયા નથી.</p>
-          <button class="btn btn-primary btn-full mt-lg" onclick="window.location.href='quiz.html'">← પાછા જાઓ</button>
-        </div>
-      `;
+                <div class="result-card">
+                    <div class="result-emoji">😔</div>
+                    <h2 style="margin-bottom:var(--space-md);">કોઈ પ્રશ્ન ઉપલબ્ધ નથી</h2>
+                    <p style="color:var(--text-secondary);">આ કેટેગરીમાં હજુ સુધી કોઈ પ્રશ્ન ઉમેરાયા નથી.</p>
+                    <button class="btn btn-primary btn-full mt-lg" onclick="window.location.href='quiz.html'">← પાછા જાઓ</button>
+                </div>
+            `;
             document.getElementById('quizHeaderBar').style.display = 'none';
             document.getElementById('quizProgress').style.display = 'none';
         }
@@ -310,31 +520,50 @@
             const progress = ((currentIndex) / questions.length) * 100;
             document.getElementById('quizProgressBar').style.width = progress + '%';
 
-            // Show ad every 5 questions
-            const adEl = document.getElementById('quizAdTop');
-            adEl.style.display = (currentIndex > 0 && currentIndex % 5 === 0) ? 'flex' : 'none';
-
-            const options = [
-                { label: 'A', text: q.optA },
-                { label: 'B', text: q.optB },
-                { label: 'C', text: q.optC },
-                { label: 'D', text: q.optD }
+            let options = [
+                { originalLabel: 'A', text: q.optA },
+                { originalLabel: 'B', text: q.optB },
+                { originalLabel: 'C', text: q.optC },
+                { originalLabel: 'D', text: q.optD }
             ];
 
+            // Filter out empty options
+            options = options.filter(o => o.text && String(o.text).trim() !== '');
+
+            // Fisher-Yates Shuffle
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+
+            const displayLabels = ['A', 'B', 'C', 'D'];
+            const originalAnswer = String(q.answer).toUpperCase();
+            let newCorrectLabel = originalAnswer;
+
+            options = options.map((opt, index) => {
+                const newLabel = displayLabels[index];
+                if (opt.originalLabel === originalAnswer) {
+                    newCorrectLabel = newLabel;
+                }
+                return { label: newLabel, text: opt.text };
+            });
+
+            q.answer = newCorrectLabel;
+
             document.getElementById('questionArea').innerHTML = `
-        <div class="question-card">
-          <div class="question-number">પ્રશ્ન ${currentIndex + 1} / ${questions.length}</div>
-          <div class="question-text">${q.question}</div>
-          <div id="optionsArea">
-            ${options.map(opt => `
-              <button class="quiz-option" onclick="selectAnswer('${opt.label}', this)" data-label="${opt.label}">
-                <span class="opt-label">${opt.label}</span>
-                <span class="opt-text">${opt.text}</span>
-              </button>
-            `).join('')}
-          </div>
-        </div>
-      `;
+                <div class="question-card">
+                    <div class="question-number">પ્રશ્ન ${currentIndex + 1} / ${questions.length}</div>
+                    <div class="question-text">${q.question}</div>
+                    <div id="optionsArea">
+                        ${options.map(opt => `
+                            <button class="quiz-option" onclick="selectAnswer('${opt.label}', this)" data-label="${opt.label}">
+                                <span class="opt-label">${opt.label}</span>
+                                <span class="opt-text">${opt.text}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
 
             document.getElementById('quizNavBtns').style.display = 'none';
         }
@@ -367,7 +596,7 @@
 
             // Show next button
             const navBtns = document.getElementById('quizNavBtns');
-            navBtns.style.display = 'flex';
+            navBtns.style.display = 'block';
             const nextBtn = document.getElementById('nextBtn');
             nextBtn.textContent = (currentIndex + 1 >= questions.length) ? '📊 પરિણામ જુઓ' : 'આગળ →';
         }
@@ -382,6 +611,9 @@
         }
 
         async function showResult() {
+            // Enable scrolling for result view
+            document.body.classList.add('show-results');
+
             const total = questions.length;
             const percentage = Math.round((score / total) * 100);
 
@@ -399,44 +631,44 @@
             const resultArea = document.getElementById('resultArea');
             resultArea.style.display = 'block';
             resultArea.innerHTML = `
-        <div class="result-card">
-          <div class="result-emoji">${emoji}</div>
-          <div class="result-score">${score} / ${total}</div>
-          <div class="result-percentage">${percentage}%</div>
-          <div class="result-message">${message}</div>
-          <p style="font-size:var(--font-size-sm);color:var(--text-muted);">
-            ${studentName} | ${categoryName}
-          </p>
-          <div class="result-actions">
-            <a href="quiz-certificate.html?name=${encodeURIComponent(studentName)}&score=${score}&total=${total}&percentage=${percentage}&category=${encodeURIComponent(categoryName)}&date=${encodeURIComponent(new Date().toLocaleDateString('gu-IN'))}" class="btn btn-primary btn-full">
-              🏆 સર્ટિફિકેટ જુઓ & ડાઉનલોડ કરો
-            </a>
-            <button class="btn btn-secondary btn-full" onclick="window.location.href='quiz.html'">🔄 બીજી ક્વિઝ રમો</button>
-            <button class="btn btn-secondary btn-full" onclick="window.location.href='leaderboard.html'">🏆 લીડરબોર્ડ</button>
-            <button class="btn btn-secondary btn-full" onclick="window.location.href='index.html'">🏠 હોમ</button>
-          </div>
-        </div>
-
-        <div class="ad-container ad-container-rect mt-lg" data-ad-slot="9999999902" data-ad-format="auto"></div>
-
-        <!-- Answer Summary -->
-        <div class="section mt-lg">
-          <div class="section-title"><span class="icon">📋</span> જવાબ સારાંશ</div>
-          <div class="strip-list">
-            ${userAnswers.map((a, i) => `
-              <div class="strip-item" style="pointer-events:none;border-left:3px solid ${a.isCorrect ? 'var(--accent-green)' : 'var(--accent-pink)'};">
-                <div class="strip-icon" style="background:${a.isCorrect ? 'rgba(0,200,150,0.15)' : 'rgba(255,64,129,0.15)'}">${a.isCorrect ? '✅' : '❌'}</div>
-                <div class="strip-content">
-                  <div class="strip-title" style="white-space:normal;font-size:var(--font-size-sm);">${a.question}</div>
-                  <div class="strip-subtitle">
-                    તમારો જવાબ: ${a.selected} | સાચો જવાબ: ${a.correct}
-                  </div>
+                <div class="result-card">
+                    <div class="result-emoji">${emoji}</div>
+                    <div class="result-score">${score} / ${total}</div>
+                    <div class="result-percentage">${percentage}%</div>
+                    <div class="result-message">${message}</div>
+                    <p style="font-size:var(--font-size-sm);color:var(--text-muted);">
+                        ${studentName} | ${categoryName}
+                    </p>
+                    <div class="result-actions">
+                        <a href="quiz-certificate.html?name=${encodeURIComponent(studentName)}&score=${score}&total=${total}&percentage=${percentage}&category=${encodeURIComponent(categoryName)}&date=${encodeURIComponent(new Date().toLocaleDateString('gu-IN'))}" class="btn btn-primary btn-full">
+                            🏆 સર્ટિફિકેટ જુઓ & ડાઉનલોડ કરો
+                        </a>
+                        <button class="btn btn-secondary btn-full" onclick="window.location.href='quiz.html'">🔄 બીજી ક્વિઝ રમો</button>
+                        <button class="btn btn-secondary btn-full" onclick="window.location.href='leaderboard.html'">🏆 લીડરબોર્ડ</button>
+                        <button class="btn btn-secondary btn-full" onclick="window.location.href='index.html'">🏠 હોમ</button>
+                    </div>
                 </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `;
+
+                <div class="ad-container ad-container-rect mt-lg" data-ad-slot="9999999902" data-ad-format="auto"></div>
+
+                <!-- Answer Summary -->
+                <div class="section mt-lg">
+                    <div class="section-title"><span class="icon">📋</span> જવાબ સારાંશ</div>
+                    <div class="strip-list">
+                        ${userAnswers.map((a, i) => `
+                            <div class="strip-item" style="pointer-events:none;border-left:3px solid ${a.isCorrect ? 'var(--accent-green)' : 'var(--accent-pink)'};">
+                                <div class="strip-icon" style="background:${a.isCorrect ? 'rgba(0,200,150,0.15)' : 'rgba(255,64,129,0.15)'}">${a.isCorrect ? '✅' : '❌'}</div>
+                                <div class="strip-content">
+                                    <div class="strip-title" style="white-space:normal;font-size:var(--font-size-sm);">${a.question}</div>
+                                    <div class="strip-subtitle">
+                                        તમારો જવાબ: ${a.selected} | સાચો જવાબ: ${a.correct}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
 
             // Submit result to Google Sheet
             try {

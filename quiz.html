@@ -141,6 +141,18 @@
                 <h1 class="page-title">❓ ક્વિઝ</h1>
             </div>
 
+            <!-- Login Notice Banner -->
+            <div id="loginNoticeBanner" class="hidden"
+                style="background:linear-gradient(135deg,rgba(108,99,255,0.15),rgba(0,200,150,0.1));border:1.5px solid var(--primary);border-radius:var(--radius-lg);padding:var(--space-md) var(--space-lg);margin-bottom:var(--space-md);display:flex;align-items:center;gap:var(--space-md);flex-wrap:wrap;">
+                <span style="font-size:1.5rem;">📢</span>
+                <div style="flex:1;">
+                    <div style="font-weight:700;color:var(--primary-light);">ક્વિઝ શરૂ કરવા માટે લોગીન કરો</div>
+                    <div style="font-size:var(--font-size-sm);color:var(--text-secondary);">Quiz start કરવા માટે પહેલા
+                        Login કરવું ફરજિયાત છે.</div>
+                </div>
+                <a href="login.html" class="btn btn-primary btn-sm">🔐 લોગીન કરો</a>
+            </div>
+
             <div class="ad-container" data-ad-slot="8888888801" data-ad-format="auto"></div>
 
             <!-- Quiz Categories Grid -->
@@ -183,17 +195,6 @@
                         </select>
                     </div>
 
-                    <!-- Student Info -->
-                    <div class="form-group">
-                        <label class="form-label">વિદ્યાર્થીનું નામ *</label>
-                        <input class="form-input" id="quizStudentName" placeholder="તમારું નામ લખો">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">મોબાઈલ નંબર *</label>
-                        <input class="form-input" id="quizMobile" type="tel" maxlength="10"
-                            placeholder="10 અંકનો મોબાઈલ નંબર">
-                    </div>
-
                     <button class="btn btn-primary btn-full mt-lg" onclick="startQuiz()" id="startQuizBtn">
                         🚀 ક્વિઝ શરૂ કરો
                     </button>
@@ -231,6 +232,13 @@
         document.addEventListener('DOMContentLoaded', async function () {
             showLoader();
 
+            // Show/hide login notice banner
+            const banner = document.getElementById('loginNoticeBanner');
+            if (!isLoggedIn()) {
+                banner.classList.remove('hidden');
+                banner.style.display = 'flex';
+            }
+
             try {
                 // Load quiz categories
                 const catRes = await apiCached('getQuizCategories');
@@ -253,6 +261,8 @@
                 console.error('Error:', err);
                 quizCategories = getDefaultCategories();
                 renderCategories();
+                allStandards = [];
+                allSubjects = [];
             }
 
             hideLoader();
@@ -269,7 +279,7 @@
       `).join('');
         }
 
-        function selectCategory(catId, catName, questionCount) {
+        async function selectCategory(catId, catName, questionCount) {
             selectedCategoryId = catId;
             selectedCategoryName = catName;
             selectedQuestionCount = questionCount;
@@ -288,65 +298,142 @@
 
             // Show standard dropdown only for "ધોરણ વાઈઝ Quiz" (id=1)
             const isStdWise = String(catId) === '1';
-            document.getElementById('stdDropdownGroup').classList.toggle('hidden', !isStdWise);
-            document.getElementById('subjectDropdownGroup').classList.toggle('hidden', !isStdWise);
-            document.getElementById('chapterDropdownGroup').classList.toggle('hidden', !isStdWise);
+
+            if (!isStdWise) {
+                // Instantly start the quiz for non-standard categories (using admin-defined max count)
+                startQuiz();
+                return;
+            }
+
+            document.getElementById('stdDropdownGroup').classList.remove('hidden');
+            // Subject & Chapter shown only after standard is selected
+            document.getElementById('subjectDropdownGroup').classList.add('hidden');
+            document.getElementById('chapterDropdownGroup').classList.add('hidden');
 
             if (isStdWise) {
                 const stdSelect = document.getElementById('quizStdSelect');
-                stdSelect.innerHTML = '<option value="">ધોરણ પસંદ કરો...</option>' +
-                    allStandards.map(s => `<option value="${s.id}">${s.standardName}</option>`).join('');
-            }
+                stdSelect.innerHTML = '<option value="">ધોરણ લોડ થઈ રહ્યું છે...</option>';
+                stdSelect.disabled = true;
 
-            // Pre-fill from login
-            const user = getUser();
-            if (user) {
-                document.getElementById('quizStudentName').value = user.name || '';
-                document.getElementById('quizMobile').value = user.mobile || '';
+                if (!allStandards || allStandards.length === 0) {
+                    try {
+                        const stdRes = await apiCached('getStandards');
+                        if (stdRes.success) allStandards = stdRes.data;
+                    } catch (e) { console.error('Error fetching standards on demand:', e); }
+                }
+
+                if (allStandards && allStandards.length > 0) {
+                    stdSelect.innerHTML = '<option value="">ધોરણ પસંદ કરો...</option>' +
+                        allStandards.map(st => `<option value="${st.id}">${st.standardName || st.name || 'ધોરણ ' + st.id}</option>`).join('');
+                } else {
+                    stdSelect.innerHTML = '<option value="">કોઇ ધોરણ ઉપલબ્ધ નથી</option>';
+                }
+                stdSelect.disabled = false;
             }
 
             setupSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        function loadQuizSubjects() {
+        // Load subjects that actually have quiz questions for the selected standard
+        async function loadQuizSubjects() {
             const stdId = document.getElementById('quizStdSelect').value;
-            if (!stdId) return;
+            if (!stdId) {
+                document.getElementById('subjectDropdownGroup').classList.add('hidden');
+                document.getElementById('chapterDropdownGroup').classList.add('hidden');
+                return;
+            }
+
+            // Show subject dropdown with loading state
             document.getElementById('subjectDropdownGroup').classList.remove('hidden');
+            document.getElementById('chapterDropdownGroup').classList.add('hidden');
             const subSelect = document.getElementById('quizSubjectSelect');
-            subSelect.innerHTML = '<option value="">વિષય પસંદ કરો...</option>' +
-                allSubjects.map(s => `<option value="${s.id}">${s.subjectName}</option>`).join('');
+            subSelect.innerHTML = '<option value="">વિષય લોડ થઈ રહ્યો છે...</option>';
+            subSelect.disabled = true;
+
+            try {
+                // Fetch quiz questions for this standard to find which subjects have questions
+                const res = await api('getQuizQuestions', { categoryId: selectedCategoryId, stdId });
+                if (res.success && res.data.length > 0) {
+                    // Get unique subjectIds that have questions
+                    const subjectIdsWithQuestions = [...new Set(res.data.map(q => String(q.subjectId)).filter(Boolean))];
+
+                    if (subjectIdsWithQuestions.length === 0) {
+                        subSelect.innerHTML = '<option value="">🙏 હાલમાં કોઈ ક્વિઝ ઉપલબ્ધ નથી</option>';
+                        subSelect.disabled = false;
+                        return;
+                    }
+
+                    // Fetch subjects on demand if not loaded yet
+                    if (!allSubjects || allSubjects.length === 0) {
+                        try {
+                            const subRes = await apiCached('getSubjects');
+                            if (subRes.success) allSubjects = subRes.data;
+                        } catch (e) { console.error('Error fetching subjects on demand:', e); }
+                    }
+
+                    // Match subjectIds with subject names from allSubjects
+                    let options = '<option value="">વિષય પસંદ કરો...</option>';
+                    subjectIdsWithQuestions.forEach(subId => {
+                        const sub = allSubjects.find(s => String(s.id) === String(subId));
+                        const subName = sub ? sub.subjectName : 'વિષય ' + subId;
+                        options += `<option value="${subId}">${subName}</option>`;
+                    });
+                    subSelect.innerHTML = options;
+                } else {
+                    subSelect.innerHTML = '<option value="">🙏 હાલમાં કોઈ ક્વિઝ ઉપલબ્ધ નથી</option>';
+                }
+            } catch (err) {
+                console.error('Subject load error:', err);
+                subSelect.innerHTML = '<option value="">વિષય લોડ થયા નથી</option>';
+            }
+            subSelect.disabled = false;
         }
 
         async function loadQuizChapters() {
             const stdId = document.getElementById('quizStdSelect').value;
             const subjectId = document.getElementById('quizSubjectSelect').value;
-            if (!stdId || !subjectId) return;
+            if (!stdId || !subjectId) {
+                document.getElementById('chapterDropdownGroup').classList.add('hidden');
+                return;
+            }
 
             document.getElementById('chapterDropdownGroup').classList.remove('hidden');
             const chapSelect = document.getElementById('quizChapterSelect');
-            chapSelect.innerHTML = '<option value="">લોડ થઈ રહ્યું...</option>';
+            chapSelect.innerHTML = '<option value="">ચેપ્ટર લોડ થઈ રહ્યા છે...</option>';
+            chapSelect.disabled = true;
 
             try {
                 const res = await api('getQuizQuestions', { categoryId: selectedCategoryId, stdId, subjectId });
-                if (res.success) {
-                    const chapters = [...new Set(res.data.map(q => q.chapter).filter(Boolean))];
-                    chapSelect.innerHTML = '<option value="">બધા ચેપ્ટર</option>' +
-                        chapters.map(c => `<option value="${c}">${c}</option>`).join('');
+                if (res.success && res.data.length > 0) {
+                    const chapters = [...new Set(res.data.map(q => String(q.chapter)).filter(Boolean))];
+                    if (chapters.length === 0) {
+                        // No chapter field in questions — allow starting without chapter
+                        chapSelect.innerHTML = '<option value="">બધા ચેપ્ટર</option>';
+                    } else {
+                        chapSelect.innerHTML = '<option value="">ચેપ્ટર પસંદ કરો...</option>' +
+                            chapters.map(c => `<option value="${c}">${c}</option>`).join('');
+                    }
+                } else {
+                    chapSelect.innerHTML = '<option value="">આ વિષય માટે કોઈ પ્રશ્ન નથી</option>';
                 }
             } catch (err) {
+                console.error('Chapter load error:', err);
                 chapSelect.innerHTML = '<option value="">ચેપ્ટર લોડ થયા નથી</option>';
             }
+            chapSelect.disabled = false;
         }
 
         function startQuiz() {
-            const name = document.getElementById('quizStudentName').value.trim();
-            const mobile = document.getElementById('quizMobile').value.trim();
-
-            if (!name) { showToast('કૃપયા તમારું નામ લખો', 'error'); return; }
-            if (!mobile || !isValidMobile(mobile)) {
-                showToast('કૃપયા 10 અંકનો સાચો મોબાઈલ નંબર નાખો', 'error');
+            // Check login
+            const user = getUser();
+            if (!user) {
+                sessionStorage.setItem('loginRedirect', window.location.href);
+                window.location.href = 'login.html';
                 return;
             }
+
+            const name = user.name || user.fullName || '';
+            const mobile = user.mobile || user.phone || '';
 
             // Build quiz URL params
             const params = new URLSearchParams();
@@ -357,12 +444,44 @@
             params.set('mobile', mobile);
 
             if (String(selectedCategoryId) === '1') {
-                const stdId = document.getElementById('quizStdSelect').value;
-                const subjectId = document.getElementById('quizSubjectSelect').value;
-                const chapter = document.getElementById('quizChapterSelect').value;
-                if (stdId) params.set('stdId', stdId);
-                if (subjectId) params.set('subjectId', subjectId);
+                const stdSelect = document.getElementById('quizStdSelect');
+                const subSelect = document.getElementById('quizSubjectSelect');
+                const chapSelect = document.getElementById('quizChapterSelect');
+                const stdId = stdSelect.value;
+                const subjectId = subSelect.value;
+                const chapter = chapSelect.value;
+
+                if (!stdId) { showToast('કૃપયા ધોરણ પસંદ કરો', 'error'); return; }
+                if (!subjectId) { showToast('કૃપયા વિષય પસંદ કરો', 'error'); return; }
+
+                if (chapSelect.disabled) {
+                    showToast('ચેપ્ટર લોડ થઈ રહ્યા છે, કૃપયા રાહ જુઓ...', 'warning');
+                    return;
+                }
+
+                if (chapSelect.options.length > 0) {
+                    const firstText = chapSelect.options[0].text;
+                    if (firstText.includes('કોઈ પ્રશ્ન નથી')) {
+                        showToast('આ વિષય માટે કોઈ પ્રશ્નો ઉપલબ્ધ નથી', 'error');
+                        return;
+                    }
+                    if (firstText.includes('ચેપ્ટર પસંદ કરો') && !chapter) {
+                        showToast('કૃપયા ચેપ્ટર પસંદ કરો', 'error');
+                        return;
+                    }
+                }
+
+                params.set('stdId', stdId);
+                params.set('subjectId', subjectId);
                 if (chapter) params.set('chapter', chapter);
+
+                // Also pass display names so quiz-play can show them without API
+                const stdName = stdSelect.options[stdSelect.selectedIndex]?.text || '';
+                const subName = subSelect.options[subSelect.selectedIndex]?.text || '';
+                const chapName = chapSelect.options[chapSelect.selectedIndex]?.text || '';
+                if (stdName) params.set('stdName', stdName);
+                if (subName) params.set('subjectName', subName);
+                if (chapName && chapter) params.set('chapterName', chapName);
             }
 
             window.location.href = 'quiz-play.html?' + params.toString();

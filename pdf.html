@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="gu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#6c63ff">
+    <title>PDF Viewer - Online Education Guru</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/common.css">
+    <!-- PDF.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        .pdf-viewer-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: var(--space-sm);
+        }
+
+        /* Toolbar: back + title + actions */
+        .pdf-toolbar {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-xs) var(--space-sm);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+        }
+
+        .pdf-toolbar .back-btn {
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
+        }
+
+        .pdf-title {
+            flex: 1;
+            font-size: var(--font-size-sm);
+            font-weight: 700;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pdf-toolbar-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .pdf-toolbar-actions .btn {
+            padding: 4px 8px;
+            font-size: var(--font-size-xs);
+        }
+
+        /* Page navigation bar */
+        .pdf-nav-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 6px var(--space-sm);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        .pdf-nav-bar .btn {
+            padding: 3px 8px;
+            font-size: 0.7rem;
+            min-width: 28px;
+        }
+
+        .pdf-page-info {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .pdf-page-input {
+            width: 36px;
+            padding: 2px 3px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            font-size: 0.7rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .pdf-page-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .pdf-zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin-left: 6px;
+        }
+
+        .pdf-zoom-controls .btn {
+            padding: 3px 6px;
+            font-size: 0.7rem;
+            min-width: 24px;
+        }
+
+        .zoom-level {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            min-width: 32px;
+            text-align: center;
+        }
+
+        /* A4 iframe container - fixed height with internal scroll */
+        .pdf-a4-frame {
+            background: #e8e8e8;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            height: 75vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm);
+        }
+
+        .pdf-page-canvas {
+            max-width: 100%;
+            height: auto !important;
+            display: block;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            background: white;
+        }
+
+        .pdf-page-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: -4px;
+            margin-bottom: var(--space-xs);
+        }
+
+        /* Fallback iframe for Google Drive */
+        .pdf-iframe-wrap {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            height: 75vh;
+        }
+
+        .pdf-iframe-wrap iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Loading state */
+        .pdf-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-xl);
+            color: var(--text-muted);
+        }
+
+        .pdf-error {
+            text-align: center;
+            padding: var(--space-xl);
+        }
+    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1217460377621795"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="site-header" id="site-header"></header>
+
+    <!-- Loader -->
+    <div class="loader-overlay" id="app-loader">
+        <div class="spinner"></div>
+        <div class="loader-text">PDF લોડ થઈ રહ્યું છે...</div>
+    </div>
+
+    <main class="page-wrapper">
+        <div class="pdf-viewer-wrapper">
+
+            <!-- Toolbar -->
+            <div class="pdf-toolbar">
+                <button class="back-btn" onclick="goBack()" title="પાછા જાઓ">←</button>
+                <div class="pdf-title" id="pdfTitle">📄 PDF Viewer</div>
+                <div class="pdf-toolbar-actions">
+                    <a href="#" id="openDriveBtn" target="_blank" class="btn btn-secondary" style="display:none;">↗️</a>
+                    <button class="btn btn-secondary" onclick="openFullscreen()">🖥️</button>
+                </div>
+            </div>
+
+            <!-- Ad Banner Top -->
+            <div class="ad-container" data-ad-slot="8888888801" data-ad-format="auto"></div>
+
+            <!-- Page Navigation -->
+            <div class="pdf-nav-bar" id="pdfNavBar" style="display:none;">
+                <button class="btn btn-secondary" onclick="goFirstPage()" title="પહેલું પેજ">⏮</button>
+                <button class="btn btn-secondary" onclick="goPrevPage()" title="પાછળનું પેજ">◀</button>
+                <div class="pdf-page-info">
+                    <input type="number" class="pdf-page-input" id="pageInput" min="1" value="1"
+                        onchange="goToPage(this.value)">
+                    / <span id="totalPages">0</span>
+                </div>
+                <button class="btn btn-secondary" onclick="goNextPage()" title="આગળનું પેજ">▶</button>
+                <button class="btn btn-secondary" onclick="goLastPage()" title="છેલ્લું પેજ">⏭</button>
+                <div class="pdf-zoom-controls">
+                    <button class="btn btn-secondary" onclick="zoomOut()">−</button>
+                    <span class="zoom-level" id="zoomLevel">100%</span>
+                    <button class="btn btn-secondary" onclick="zoomIn()">+</button>
+                </div>
+            </div>
+
+            <!-- A4 PDF Frame - fixed height, internal scroll -->
+            <div class="pdf-a4-frame" id="pdfA4Frame">
+                <div class="pdf-loading" id="pdfLoading">
+                    <div class="spinner"></div>
+                    <div>PDF લોડ થઈ રહ્યું છે...</div>
+                </div>
+            </div>
+
+            <!-- Fallback iframe -->
+            <div class="pdf-iframe-wrap" id="pdfIframeWrap" style="display:none;">
+                <iframe id="pdfIframe" allow="autoplay" allowfullscreen></iframe>
+            </div>
+
+            <!-- Ad Banner Bottom -->
+            <div class="ad-container ad-container-rect" data-ad-slot="8888888802" data-ad-format="auto"
+                style="margin-top:var(--space-md);"></div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer" id="site-footer"></footer>
+
+    <script src="js/common.js"></script>
+    <script>
+        // Set PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // State
+        let pdfDoc = null;
+        let currentPage = 1;
+        let totalPagesCount = 0;
+        let scale = 1.2;
+        let pageCanvases = [];
+
+        // URL Params (captured before common.js clears them)
+        const params = new URLSearchParams(window.location.search);
+        let fileId = params.get('fileId') || '';
+        const fileUrl = params.get('url') || '';
+        const fileName = params.get('name') || params.get('title') || 'PDF';
+        const source = params.get('source') || '';
+        const backUrl = params.get('back') || '';
+
+        // Save for refresh
+        if (fileId || fileUrl) {
+            sessionStorage.setItem('oeg_pdf_fileId', fileId);
+            sessionStorage.setItem('oeg_pdf_fileUrl', fileUrl);
+            sessionStorage.setItem('oeg_pdf_fileName', fileName);
+            sessionStorage.setItem('oeg_pdf_source', source);
+            sessionStorage.setItem('oeg_pdf_back', backUrl);
+        }
+
+        // If no params (page refreshed), try session storage
+        if (!fileId && !fileUrl) {
+            const savedFileId = sessionStorage.getItem('oeg_pdf_fileId') || '';
+            const savedFileUrl = sessionStorage.getItem('oeg_pdf_fileUrl') || '';
+            const savedBack = sessionStorage.getItem('oeg_pdf_back') || '';
+            const savedSource = sessionStorage.getItem('oeg_pdf_source') || '';
+
+            if (savedFileId || savedFileUrl) {
+                fileId = savedFileId;
+            } else {
+                if (savedBack) window.location.replace(savedBack);
+                else if (savedSource === 'teacher') window.location.replace('teacher-tools.html');
+                else if (savedSource === 'office') window.location.replace('office-tools.html');
+                else window.location.replace('index.html');
+            }
+        }
+
+        // Set title
+        const decodedName = decodeURIComponent(fileName);
+        document.getElementById('pdfTitle').textContent = '📄 ' + decodedName;
+        document.title = decodedName + ' - PDF Viewer | Online Education Guru';
+
+        // Extract Google Drive file ID from URL
+        function extractDriveId(url) {
+            if (!url) return null;
+            const patterns = [
+                /\/file\/d\/([a-zA-Z0-9_-]+)/,
+                /\/d\/([a-zA-Z0-9_-]+)/,
+                /[?&]id=([a-zA-Z0-9_-]+)/,
+                /\/open\?id=([a-zA-Z0-9_-]+)/
+            ];
+            for (const p of patterns) {
+                const m = url.match(p);
+                if (m) return m[1];
+            }
+            return null;
+        }
+
+        // Back navigation
+        function goBack() {
+            if (backUrl) {
+                window.location.href = backUrl;
+            } else if (source === 'teacher') {
+                window.location.href = 'teacher-tools.html';
+            } else if (source === 'office') {
+                window.location.href = 'office-tools.html';
+            } else if (document.referrer && document.referrer.includes(window.location.hostname)) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function openFullscreen() {
+            const el = document.getElementById('pdfA4Frame');
+            if (el.requestFullscreen) el.requestFullscreen();
+            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+            else if (el.msRequestFullscreen) el.msRequestFullscreen();
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', async function () {
+            showLoader('PDF લોડ થઈ રહ્યું છે...');
+
+            if (!fileId && fileUrl) {
+                fileId = extractDriveId(fileUrl);
+            }
+
+            if (fileId) {
+                const openBtn = document.getElementById('openDriveBtn');
+                openBtn.href = `https://drive.google.com/file/d/${fileId}/view`;
+                openBtn.style.display = 'inline-flex';
+            }
+
+            let pdfjsUrl = '';
+            if (fileId) {
+                pdfjsUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+            } else if (fileUrl) {
+                pdfjsUrl = decodeURIComponent(fileUrl);
+            }
+
+            if (pdfjsUrl) {
+                try {
+                    await loadWithPdfJs(pdfjsUrl);
+                } catch (err) {
+                    console.warn('PDF.js failed, falling back to iframe:', err);
+                    loadWithIframe();
+                }
+            } else {
+                showError('કોઈ PDF URL આપેલ નથી.');
+            }
+
+            hideLoader();
+        });
+
+        // Load with PDF.js - render all pages inside A4 frame
+        async function loadWithPdfJs(url) {
+            const loadingTask = pdfjsLib.getDocument({ url: url, withCredentials: false });
+            pdfDoc = await loadingTask.promise;
+            totalPagesCount = pdfDoc.numPages;
+
+            document.getElementById('totalPages').textContent = totalPagesCount;
+            document.getElementById('pageInput').max = totalPagesCount;
+            document.getElementById('pdfNavBar').style.display = 'flex';
+
+            const frame = document.getElementById('pdfA4Frame');
+            frame.innerHTML = '';
+            pageCanvases = [];
+
+            // Render ALL pages inside the A4 frame (scrollable container)
+            for (let i = 1; i <= totalPagesCount; i++) {
+                const pageDiv = document.createElement('div');
+                pageDiv.id = 'pdfPage' + i;
+                pageDiv.style.width = '100%';
+                pageDiv.style.display = 'flex';
+                pageDiv.style.flexDirection = 'column';
+                pageDiv.style.alignItems = 'center';
+                pageDiv.style.flexShrink = '0';
+
+                const canvas = document.createElement('canvas');
+                canvas.className = 'pdf-page-canvas';
+                pageDiv.appendChild(canvas);
+
+                const label = document.createElement('div');
+                label.className = 'pdf-page-label';
+                label.textContent = '— પેજ ' + i + ' / ' + totalPagesCount + ' —';
+                pageDiv.appendChild(label);
+
+                frame.appendChild(pageDiv);
+                pageCanvases.push(canvas);
+
+                await renderPageToCanvas(i, canvas);
+            }
+
+            // Track scroll position
+            setupScrollObserver(frame);
+        }
+
+        async function renderPageToCanvas(pageNum, canvas) {
+            const page = await pdfDoc.getPage(pageNum);
+            const viewport = page.getViewport({ scale: scale });
+            const ctx = canvas.getContext('2d');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+        }
+
+        // Track which page is visible during scroll inside the A4 frame
+        function setupScrollObserver(frame) {
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const pageNum = parseInt(entry.target.id.replace('pdfPage', ''));
+                        if (pageNum && pageNum !== currentPage) {
+                            currentPage = pageNum;
+                            document.getElementById('pageInput').value = pageNum;
+                        }
+                    }
+                });
+            }, { root: frame, threshold: 0.3 });
+
+            for (let i = 1; i <= totalPagesCount; i++) {
+                const el = document.getElementById('pdfPage' + i);
+                if (el) observer.observe(el);
+            }
+        }
+
+        // Fallback: iframe
+        function loadWithIframe() {
+            document.getElementById('pdfA4Frame').style.display = 'none';
+            document.getElementById('pdfNavBar').style.display = 'none';
+
+            const wrap = document.getElementById('pdfIframeWrap');
+            wrap.style.display = 'block';
+            const iframe = document.getElementById('pdfIframe');
+
+            if (fileId) {
+                iframe.src = `https://drive.google.com/file/d/${fileId}/preview`;
+            } else if (fileUrl) {
+                const decoded = decodeURIComponent(fileUrl);
+                if (decoded.toLowerCase().split('?')[0].endsWith('.pdf')) {
+                    iframe.src = `https://docs.google.com/gview?url=${encodeURIComponent(decoded)}&embedded=true`;
+                } else {
+                    iframe.src = decoded;
+                }
+            }
+        }
+
+        // Navigation - scroll to page inside A4 frame
+        function scrollToPage(pageNum) {
+            const el = document.getElementById('pdfPage' + pageNum);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                currentPage = pageNum;
+                document.getElementById('pageInput').value = pageNum;
+            }
+        }
+
+        function goFirstPage() { scrollToPage(1); }
+        function goPrevPage() { if (currentPage > 1) scrollToPage(currentPage - 1); }
+        function goNextPage() { if (currentPage < totalPagesCount) scrollToPage(currentPage + 1); }
+        function goLastPage() { scrollToPage(totalPagesCount); }
+
+        function goToPage(num) {
+            const n = parseInt(num);
+            if (n >= 1 && n <= totalPagesCount) {
+                scrollToPage(n);
+            } else {
+                document.getElementById('pageInput').value = currentPage;
+            }
+        }
+
+        // Zoom - re-render all pages
+        async function applyZoom() {
+            document.getElementById('zoomLevel').textContent = Math.round(scale * 100 / 1.2) + '%';
+            if (!pdfDoc) return;
+            for (let i = 1; i <= totalPagesCount; i++) {
+                await renderPageToCanvas(i, pageCanvases[i - 1]);
+            }
+        }
+
+        function zoomIn() { scale = Math.min(scale + 0.3, 4.5); applyZoom(); }
+        function zoomOut() { scale = Math.max(scale - 0.3, 0.6); applyZoom(); }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function (e) {
+            if (e.target.tagName === 'INPUT') return;
+            switch (e.key) {
+                case 'ArrowLeft': case 'ArrowUp': e.preventDefault(); goPrevPage(); break;
+                case 'ArrowRight': case 'ArrowDown': e.preventDefault(); goNextPage(); break;
+                case 'Home': e.preventDefault(); goFirstPage(); break;
+                case 'End': e.preventDefault(); goLastPage(); break;
+                case '+': case '=': e.preventDefault(); zoomIn(); break;
+                case '-': e.preventDefault(); zoomOut(); break;
+            }
+        });
+
+        function showError(msg) {
+            hideLoader();
+            document.getElementById('pdfA4Frame').innerHTML = `
+                <div class="pdf-error">
+                    <div style="font-size:3rem;margin-bottom:var(--space-sm);">⚠️</div>
+                    <div class="empty-text">${msg}</div>
+                    <button class="btn btn-primary mt-md" onclick="goBack()">← પાછા જાઓ</button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>

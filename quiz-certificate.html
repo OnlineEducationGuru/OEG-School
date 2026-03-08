@@ -16,94 +16,104 @@
     <!-- jsPDF for PDF export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        .cert-page {
-            min-height: 100vh;
+        .cert-layout {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: var(--space-lg);
-            background: var(--bg-gradient);
+            gap: var(--space-lg);
+            padding: var(--space-md);
+        }
+
+        /* Desktop: side by side */
+        @media (min-width: 768px) {
+            .cert-layout {
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: center;
+                max-width: 1000px;
+                margin: 0 auto;
+            }
         }
 
         .certificate {
             width: 100%;
-            max-width: 550px;
+            max-width: 480px;
             background: linear-gradient(135deg, #0a0a2e 0%, #1a1050 30%, #0d0d35 70%, #0a0a2e 100%);
             border: none;
             border-radius: 0;
-            padding: 40px 30px;
+            padding: 32px 24px;
             text-align: center;
             position: relative;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         /* Ornate border */
         .certificate::before {
             content: '';
             position: absolute;
-            inset: 6px;
+            inset: 5px;
             border: 2px solid rgba(255, 214, 0, 0.4);
         }
 
         .certificate::after {
             content: '';
             position: absolute;
-            inset: 12px;
+            inset: 10px;
             border: 1px solid rgba(255, 214, 0, 0.15);
         }
 
         /* Corner decorations */
         .cert-corner {
             position: absolute;
-            width: 40px;
-            height: 40px;
+            width: 32px;
+            height: 32px;
             border: 3px solid rgba(255, 214, 0, 0.6);
         }
 
         .cert-corner.tl {
-            top: 16px;
-            left: 16px;
+            top: 14px;
+            left: 14px;
             border-right: none;
             border-bottom: none;
         }
 
         .cert-corner.tr {
-            top: 16px;
-            right: 16px;
+            top: 14px;
+            right: 14px;
             border-left: none;
             border-bottom: none;
         }
 
         .cert-corner.bl {
-            bottom: 16px;
-            left: 16px;
+            bottom: 14px;
+            left: 14px;
             border-right: none;
             border-top: none;
         }
 
         .cert-corner.br {
-            bottom: 16px;
-            right: 16px;
+            bottom: 14px;
+            right: 14px;
             border-left: none;
             border-top: none;
         }
 
         .cert-logo {
-            font-size: 2rem;
-            margin-bottom: 8px;
+            font-size: 1.8rem;
+            margin-bottom: 6px;
         }
 
         .cert-org {
-            font-size: 0.75rem;
-            letter-spacing: 4px;
+            font-size: 0.65rem;
+            letter-spacing: 3px;
             text-transform: uppercase;
             color: rgba(255, 214, 0, 0.7);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .cert-main-title {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 800;
             background: linear-gradient(135deg, #ffd600, #ff9100, #ffd600);
             -webkit-background-clip: text;
@@ -113,216 +123,253 @@
         }
 
         .cert-subtitle {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .cert-divider {
             width: 60%;
             height: 1px;
             background: linear-gradient(90deg, transparent, rgba(255, 214, 0, 0.4), transparent);
-            margin: 16px auto;
+            margin: 12px auto;
         }
 
         .cert-label {
-            font-size: 0.7rem;
-            letter-spacing: 3px;
+            font-size: 0.6rem;
+            letter-spacing: 2px;
             text-transform: uppercase;
             color: rgba(255, 255, 255, 0.4);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .cert-name {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: #fff;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             text-shadow: 0 2px 10px rgba(108, 99, 255, 0.3);
         }
 
         .cert-category {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: var(--accent-cyan);
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .cert-score-box {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 24px;
+            gap: 10px;
+            padding: 8px 18px;
             background: rgba(0, 200, 150, 0.1);
             border: 1px solid rgba(0, 200, 150, 0.3);
             border-radius: var(--radius-md);
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .cert-score-num {
-            font-size: 2rem;
+            font-size: 1.6rem;
             font-weight: 800;
             color: var(--accent-green);
         }
 
         .cert-score-label {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: rgba(255, 255, 255, 0.5);
             text-align: left;
         }
 
         .cert-percentage {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 800;
             color: var(--accent-cyan);
         }
 
         .cert-sign-area {
-            margin-top: 20px;
+            margin-top: 14px;
             position: relative;
             z-index: 1;
         }
 
         .cert-sign-name {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-style: italic;
             color: rgba(255, 214, 0, 0.8);
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .cert-sign-line {
-            width: 140px;
+            width: 120px;
             height: 1px;
             background: rgba(255, 214, 0, 0.3);
-            margin: 0 auto 6px;
+            margin: 0 auto 4px;
         }
 
         .cert-sign-title {
-            font-size: 0.65rem;
+            font-size: 0.55rem;
             color: rgba(255, 255, 255, 0.35);
             letter-spacing: 2px;
         }
 
         .cert-date {
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             color: rgba(255, 255, 255, 0.3);
-            margin-top: 12px;
+            margin-top: 8px;
         }
 
         /* Star decorations */
         .cert-star {
             position: absolute;
             color: rgba(255, 214, 0, 0.15);
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             z-index: 0;
         }
 
         .cert-star.s1 {
-            top: 30px;
-            right: 50px;
+            top: 25px;
+            right: 40px;
         }
 
         .cert-star.s2 {
-            bottom: 40px;
-            left: 40px;
+            bottom: 30px;
+            left: 30px;
         }
 
         .cert-star.s3 {
             top: 50%;
-            left: 20px;
+            left: 15px;
         }
 
-        /* Actions */
-        .cert-actions {
+        /* Actions Panel */
+        .cert-actions-panel {
             display: flex;
             flex-direction: column;
             gap: var(--space-sm);
-            max-width: 550px;
             width: 100%;
-            margin-top: var(--space-xl);
+            max-width: 480px;
         }
 
-        .cert-actions .btn {
+        @media (min-width: 768px) {
+            .cert-actions-panel {
+                max-width: 280px;
+            }
+        }
+
+        .cert-actions-panel .btn {
             justify-content: center;
+            font-size: var(--font-size-sm);
+            padding: 10px 16px;
         }
 
         .share-row {
             display: flex;
-            gap: var(--space-sm);
+            gap: var(--space-xs);
         }
 
         .share-row .btn {
             flex: 1;
+            font-size: var(--font-size-xs);
+            padding: 8px 10px;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="cert-page">
+    <!-- Header -->
+    <header class="site-header" id="site-header"></header>
 
-        <!-- Certificate -->
-        <div class="certificate" id="certificateEl">
-            <!-- Corner decorations -->
-            <div class="cert-corner tl"></div>
-            <div class="cert-corner tr"></div>
-            <div class="cert-corner bl"></div>
-            <div class="cert-corner br"></div>
-
-            <!-- Star decorations -->
-            <span class="cert-star s1">✦</span>
-            <span class="cert-star s2">✦</span>
-            <span class="cert-star s3">✦</span>
-
-            <div class="cert-logo">📚</div>
-            <div class="cert-org">ONLINE EDUCATION GURU</div>
-            <div class="cert-main-title">પ્રમાણપત્ર</div>
-            <div class="cert-subtitle">Certificate of Achievement</div>
-
-            <div class="cert-divider"></div>
-
-            <div class="cert-label">THIS IS PRESENTED TO</div>
-            <div class="cert-name" id="certName">-</div>
-
-            <div class="cert-category" id="certCategory">-</div>
-
-            <div class="cert-score-box">
-                <div>
-                    <div class="cert-score-num" id="certScore">0/0</div>
-                    <div class="cert-score-label">Score</div>
-                </div>
-                <div style="width:1px;height:40px;background:rgba(255,255,255,0.1);"></div>
-                <div>
-                    <div class="cert-percentage" id="certPercentage">0%</div>
-                    <div class="cert-score-label">Percentage</div>
-                </div>
-            </div>
-
-            <div class="cert-divider"></div>
-
-            <div class="cert-sign-area">
-                <div class="cert-sign-line"></div>
-                <div class="cert-sign-name">Online Education Guru</div>
-                <div class="cert-sign-title">AUTHORIZED SIGNATURE</div>
-            </div>
-
-            <div class="cert-date" id="certDate"></div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="cert-actions">
-            <button class="btn btn-primary btn-full" onclick="downloadPNG()">📥 PNG ડાઉનલોડ કરો</button>
-            <button class="btn btn-secondary btn-full" onclick="downloadPDF()">📄 PDF ડાઉનલોડ કરો</button>
-            <div class="share-row">
-                <button class="btn btn-success" onclick="shareWhatsApp()">💬 WhatsApp શેર</button>
-                <button class="btn btn-secondary" onclick="window.location.href='quiz.html'">🔄 બીજી ક્વિઝ</button>
-            </div>
-            <button class="btn btn-secondary btn-full" onclick="window.location.href='index.html'">🏠 હોમ</button>
-        </div>
-
-        <div class="ad-container ad-container-rect mt-lg" data-ad-slot="1010101001" data-ad-format="auto"
-            style="max-width:550px;width:100%;"></div>
-
+    <!-- Loader -->
+    <div class="loader-overlay" id="app-loader">
+        <div class="spinner"></div>
+        <div class="loader-text">લોડ થઈ રહ્યું છે...</div>
     </div>
+
+    <!-- Main Content -->
+    <main class="page-wrapper">
+        <div class="container">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <button class="back-btn" onclick="window.location.href='quiz.html'">←</button>
+                <h1 class="page-title">🏆 સર્ટિફિકેટ</h1>
+            </div>
+
+            <!-- Certificate + Actions Layout -->
+            <div class="cert-layout">
+
+                <!-- Certificate -->
+                <div class="certificate" id="certificateEl">
+                    <!-- Corner decorations -->
+                    <div class="cert-corner tl"></div>
+                    <div class="cert-corner tr"></div>
+                    <div class="cert-corner bl"></div>
+                    <div class="cert-corner br"></div>
+
+                    <!-- Star decorations -->
+                    <span class="cert-star s1">✦</span>
+                    <span class="cert-star s2">✦</span>
+                    <span class="cert-star s3">✦</span>
+
+                    <div class="cert-logo">📚</div>
+                    <div class="cert-org">ONLINE EDUCATION GURU</div>
+                    <div class="cert-main-title">પ્રમાણપત્ર</div>
+                    <div class="cert-subtitle">Certificate of Achievement</div>
+
+                    <div class="cert-divider"></div>
+
+                    <div class="cert-label">THIS IS PRESENTED TO</div>
+                    <div class="cert-name" id="certName">-</div>
+
+                    <div class="cert-category" id="certCategory">-</div>
+
+                    <div class="cert-score-box">
+                        <div>
+                            <div class="cert-score-num" id="certScore">0/0</div>
+                            <div class="cert-score-label">Score</div>
+                        </div>
+                        <div style="width:1px;height:32px;background:rgba(255,255,255,0.1);"></div>
+                        <div>
+                            <div class="cert-percentage" id="certPercentage">0%</div>
+                            <div class="cert-score-label">Percentage</div>
+                        </div>
+                    </div>
+
+                    <div class="cert-divider"></div>
+
+                    <div class="cert-sign-area">
+                        <div class="cert-sign-line"></div>
+                        <div class="cert-sign-name">Online Education Guru</div>
+                        <div class="cert-sign-title">AUTHORIZED SIGNATURE</div>
+                    </div>
+
+                    <div class="cert-date" id="certDate"></div>
+                </div>
+
+                <!-- Action Buttons Panel -->
+                <div class="cert-actions-panel">
+                    <button class="btn btn-primary btn-full" onclick="downloadPNG()">📥 PNG ડાઉનલોડ</button>
+                    <button class="btn btn-secondary btn-full" onclick="downloadPDF()">📄 PDF ડાઉનલોડ</button>
+                    <div class="share-row">
+                        <button class="btn btn-success" onclick="shareWhatsApp()">💬 WhatsApp</button>
+                        <button class="btn btn-secondary" onclick="window.location.href='quiz.html'">🔄 બીજી
+                            ક્વિઝ</button>
+                    </div>
+                    <button class="btn btn-secondary btn-full" onclick="window.location.href='index.html'">🏠
+                        હોમ</button>
+
+                    <div class="ad-container ad-container-rect mt-md" data-ad-slot="1010101001" data-ad-format="auto">
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer" id="site-footer"></footer>
 
     <script src="js/common.js"></script>
     <script>
@@ -342,6 +389,11 @@
         document.getElementById('certPercentage').textContent = percentage + '%';
         document.getElementById('certDate').textContent = 'Date: ' + dateStr;
         document.title = name + ' - Certificate | Online Education Guru';
+
+        // Hide URL params from address bar to prevent copying/clutter
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
 
         // ---- Download as PNG ----
         async function downloadPNG() {
@@ -419,7 +471,6 @@
                                 files: [file]
                             });
                         } catch (shareErr) {
-                            // Fallback to WhatsApp URL
                             fallbackWhatsApp();
                         }
                     }, 'image/png');
